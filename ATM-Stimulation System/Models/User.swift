@@ -1,6 +1,6 @@
 import Foundation
 
-struct User {
+struct User: Equatable {
 
     let id: UUID
     let name: String
@@ -21,6 +21,5 @@ struct User {
         self.password = password
         self.phoneNumber = phoneNumber
     }
-    
     
 }
