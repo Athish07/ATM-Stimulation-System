@@ -21,5 +21,4 @@ struct User: Equatable {
         self.password = password
         self.phoneNumber = phoneNumber
     }
-    
 }
