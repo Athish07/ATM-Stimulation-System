@@ -9,8 +9,14 @@ struct Transaction {
     let type: TransactionType
     let status: TransactionStatus
     let date: Date
-    
-    init(fromAccoutNumber: UUID? = nil, toAccountNumber: UUID? = nil, amount: Double, type: TransactionType, status: TransactionStatus) {
+
+    init(
+        fromAccoutNumber: UUID? = nil,
+        toAccountNumber: UUID? = nil,
+        amount: Double,
+        type: TransactionType,
+        status: TransactionStatus
+    ) {
         self.id = UUID()
         self.fromAccoutNumber = fromAccoutNumber
         self.toAccountNumber = toAccountNumber
@@ -19,7 +25,7 @@ struct Transaction {
         self.type = type
         self.status = status
     }
-    
+
 }
 
 extension Transaction {
@@ -29,7 +35,7 @@ extension Transaction {
         case withdrawal
         case transfer
     }
-    
+
     enum TransactionStatus {
         case completed
         case failed(reason: String)

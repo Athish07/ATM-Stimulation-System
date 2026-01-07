@@ -1,8 +1,9 @@
 import Foundation
 
 struct Account {
-
+    
     let accountNumber: UUID
+    let userId: UUID
     var bankName: String
     let bankLocation: String
     let openedDate: Date
@@ -11,10 +12,12 @@ struct Account {
 
     init(
         bankName: String,
+        userId: UUID,
         bankLocation: String,
         accountType: AccountType = AccountType.savings
     ) {
         self.accountNumber = UUID()
+        self.userId = userId
         self.bankName = bankName
         self.bankLocation = bankLocation
         self.openedDate = Date()

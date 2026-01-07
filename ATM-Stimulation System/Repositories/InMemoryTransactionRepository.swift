@@ -1,7 +1,7 @@
 import Foundation
 
 class InMemoryTransactionRepository: TransactionRepository {
-
+    
     private let transactions: [UUID: Transaction] = [:]
 
     func getAll() -> [Transaction] {
@@ -14,11 +14,11 @@ class InMemoryTransactionRepository: TransactionRepository {
         return transactions[transactionId]
     }
 
-    func findByAcxcountNumber(accountNumber: UUID) -> Transaction? {
+    func findByAccountNumber(accountNumber: UUID) -> Transaction? {
         return transactions.values.first {
-            $0.senderAccoutNumber == accountNumber
-                || $0.receiverAccountNumber == accountNumber
+            $0.fromAccoutNumber == accountNumber
+                || $0.toAccountNumber == accountNumber
         }
     }
-
+    
 }
