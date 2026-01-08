@@ -1,6 +1,6 @@
 import Foundation
 
-final class CurrentAccountManager: AccountTransactionService {
+final class CurrentAccountManager: CurrentAccountService {
 
     typealias AccountType = CurrentAccount
     private let repository: CurrentAccountRepository

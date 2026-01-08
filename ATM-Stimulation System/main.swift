@@ -8,11 +8,11 @@ let savingAccountRepository: SavingsAccountRepository =
 let transactionRepository: TransactionRepository =
     InMemoryTransactionRepository()
 
-let currentAccountService: some AccountTransactionService =  CurrentAccountManager(
+let currentAccountService: CurrentAccountService =  CurrentAccountManager(
     repository: currentAccountRepository
 )
 
-let savingAccountService: some AccountTransactionService = SavingsAccountManager(
+let savingAccountService: SavingsAccountService = SavingsAccountManager(
     repository: savingAccountRepository
 )
 

@@ -1,6 +1,6 @@
 import Foundation
 
-final class SavingsAccountManager: AccountTransactionService {
+final class SavingsAccountManager: SavingsAccountService {
 
     typealias AccountType = SavingsAccount
     private let repository: SavingsAccountRepository

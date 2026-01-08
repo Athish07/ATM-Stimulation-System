@@ -3,23 +3,23 @@ import Foundation
 struct Transaction {
     
     let id: UUID
-    let fromAccountNumber: UUID
-    let toAccountNumber: UUID
+    let accountNumber: UUID
+    let counterAccountNumber: UUID?
     let amount: Double
     let type: TransactionType
     let status: TransactionStatus
     let date: Date
 
     init(
-        fromAccountNumber: UUID,
-        toAccountNumber: UUID,
+        accountNumber: UUID,
+        counterAccountNumber: UUID? = nil,
         amount: Double,
         type: TransactionType,
         status: TransactionStatus
     ) {
         self.id = UUID()
-        self.fromAccountNumber = fromAccountNumber
-        self.toAccountNumber = toAccountNumber
+        self.accountNumber = accountNumber
+        self.counterAccountNumber = counterAccountNumber
         self.date = Date()
         self.amount = amount
         self.type = type

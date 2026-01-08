@@ -70,11 +70,18 @@ class AppController {
                 password: password
             )
             print("\nUser login successful, welocome \(user.name)")
-            
+
+            let userController = UserController(
+                userId: user.id,
+                userService: userService,
+                transactionService: transactionService
+            )
+            userController.start()
+
         } catch {
             print(error.localizedDescription)
         }
-        
+
     }
 
     private func register() {
@@ -105,7 +112,7 @@ class AppController {
             print(error.localizedDescription)
         }
     }
-    
+
 }
 
 extension AppController {

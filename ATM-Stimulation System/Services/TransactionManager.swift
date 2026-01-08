@@ -2,13 +2,13 @@ import Foundation
 
 final class TransactionManager: TransactionService {
 
-    private let currentService: any AccountTransactionService
-    private let savingsService: any AccountTransactionService
+    private let currentService: CurrentAccountService
+    private let savingsService: SavingsAccountService
     private let transactionRepository: TransactionRepository
     
     init(
-        currentService: some AccountTransactionService,
-        savingsService: some AccountTransactionService,
+        currentService: CurrentAccountService,
+        savingsService: SavingsAccountService,
         transactionRepository: TransactionRepository
     ) {
         self.currentService =  currentService
@@ -85,7 +85,7 @@ final class TransactionManager: TransactionService {
         )
     }
 
-    private func findService(for type: AccountType) -> any AccountTransactionService {
+    private func findService<T: CurrentAccountService>(for type: AccountType) -> T {
         switch type {
         case .current:
             return currentService

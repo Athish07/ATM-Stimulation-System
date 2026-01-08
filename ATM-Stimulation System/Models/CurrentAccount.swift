@@ -1,7 +1,7 @@
 import Foundation
 
-class CurrentAccount: Account {
-
+struct CurrentAccount {
+    private var account: Account
     private(set) var overDraftLimit: Double?
 
     init(
@@ -12,29 +12,43 @@ class CurrentAccount: Account {
         overDraftLimit: Double?
     ) {
         self.overDraftLimit = overDraftLimit
-        super.init(
+        self.account = Account(
             bankName: bankName,
             userId: userId,
             bankLocation: bankLocation,
             minimumBalance: minimumBalance
         )
     }
-    
-    func withdraw(_ amount: Double) -> Bool {
+
+    var accountNumber: UUID { account.accountNumber }
+    var userId: UUID { account.userId }
+    var bankName: String { account.bankName }
+    var bankLocation: String { account.bankLocation }
+    var openedDate: Date { account.openedDate }
+    var minimumBalance: Double { account.minimumBalance }
+    var balance: Double { account.balance }
+
+    mutating func withdraw(_ amount: Double) -> Bool {
         guard amount > 0 else { return false }
 
         let newBalance = balance - amount
 
         if newBalance >= minimumBalance {
-            decreaseBalance(amount)
+            account.decreaseBalance(amount)
             return true
         }
-        
+
         if let limit = overDraftLimit, newBalance >= -limit {
-            decreaseBalance(amount)
+            account.decreaseBalance(amount)
             return true
         }
         return false
     }
 
+    mutating func deposit(_ amount: Double) -> Bool {
+        guard amount > 0 else { return false }
+        account.increaseBalance(amount)
+        return true
+    }
+    
 }

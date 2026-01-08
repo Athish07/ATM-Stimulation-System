@@ -1,6 +1,6 @@
 import Foundation
 
-class Account {
+struct Account {
 
     let accountNumber: UUID
     let userId: UUID
@@ -24,23 +24,23 @@ class Account {
         self.openedDate = Date()
         self.minimumBalance = minimumBalance
     }
-    
+
     enum AccountType {
         case savings
         case current
     }
-    
-    func deposit(_ amount: Double) -> Bool {
+
+    mutating func deposit(_ amount: Double) -> Bool {
         guard amount > 0 else { return false }
         balance += amount
         return true
     }
-    
-    func increaseBalance(_ amount: Double) {
+
+    mutating func increaseBalance(_ amount: Double) {
         balance += amount
     }
-    
-    func decreaseBalance(_ amount: Double) {
+
+    mutating func decreaseBalance(_ amount: Double) {
         balance -= amount
     }
 }
