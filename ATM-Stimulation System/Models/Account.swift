@@ -1,79 +1,44 @@
 import Foundation
 
-struct Account {
-    
+class Account {
+
     let accountNumber: UUID
     let userId: UUID
-    var bankName: String
+    let bankName: String
     let bankLocation: String
     let openedDate: Date
-    private(set) var balance: Double
-    let type: AccountType
-    
+    let minimumBalance: Double
+
+    private(set) var balance: Double = 0.0
+
     init(
         bankName: String,
         userId: UUID,
         bankLocation: String,
-        accountType: AccountType = AccountType.savings
+        minimumBalance: Double,
     ) {
         self.accountNumber = UUID()
         self.userId = userId
         self.bankName = bankName
         self.bankLocation = bankLocation
         self.openedDate = Date()
-        self.balance = 0.0
-        self.type = accountType
-
+        self.minimumBalance = minimumBalance
     }
     
-}
-
-extension Account {
-
-    mutating func deposit(_ amount: Double) -> Bool {
+    func deposit(_ amount: Double) -> Bool {
         guard amount > 0 else { return false }
         balance += amount
         return true
     }
-
-    mutating func withdraw(_ amount: Double) -> Bool {
-        guard amount > 0 else { return false }
-
-        let newBalance = balance - amount
-
-        if type.allowOverDraft {
-            balance = newBalance
-            return true
-        }
-
-        if type.minimumBalance <= newBalance {
-            balance = newBalance
-            return true
-        }
-
-        return false
+    
+    func increaseBalance(_ amount: Double) {
+        balance += amount
     }
+    
+    func decreaseBalance(_ amount: Double) {
+        balance -= amount
+    }
+    
+    
 }
 
-extension Account {
-
-    enum AccountType {
-        case savings
-        case current
-
-        var minimumBalance: Double {
-            switch self {
-            case .savings: return 0
-            case .current: return 1000
-
-            }
-        }
-
-        var allowOverDraft: Bool {
-            switch self {
-            case .current: return true
-            case .savings: return false
-            }
-        }
-    }
-}
