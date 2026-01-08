@@ -5,7 +5,7 @@ struct OutputUtils {
         title: String
     ) {
         
-        print("==== \(title) =====")
+        print("\n==== \(title) =====\n")
         
         for (index,option) in options.enumerated() {
             

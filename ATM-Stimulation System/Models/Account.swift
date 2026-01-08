@@ -9,7 +9,7 @@ struct Account {
     let openedDate: Date
     private(set) var balance: Double
     let type: AccountType
-
+    
     init(
         bankName: String,
         userId: UUID,
@@ -25,8 +25,9 @@ struct Account {
         self.type = accountType
 
     }
-
+    
 }
+
 extension Account {
 
     mutating func deposit(_ amount: Double) -> Bool {

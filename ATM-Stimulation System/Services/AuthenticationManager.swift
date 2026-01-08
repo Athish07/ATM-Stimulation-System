@@ -8,21 +8,21 @@ final class AuthenticationManager: AuthenticationService {
         self.userRepository = userRepository
     }
     
-    func login(identifier: LoginIdentifier, password: String) throws -> User {
+    func login(type: LoginType, identifier: String, password: String) throws -> User {
         
         let user: User
         
-        switch identifier {
+        switch type {
             
-        case .email(let email):
-            guard let foundUser = userRepository.findByEmail(email)
+        case .email:
+            guard let foundUser = userRepository.findByEmail(identifier)
             else {
                 throw AuthenticationError.invalidUser
             }
             user = foundUser
             
-        case .phoneNumber(let phoneNumber):
-            guard let foundUser = userRepository.findByPhoneNumber(phoneNumber)
+        case .phoneNumber:
+            guard let foundUser = userRepository.findByPhoneNumber(identifier)
             else {
                 throw AuthenticationError.invalidUser
             }

@@ -1,13 +1,14 @@
 import Foundation
 
-enum LoginIdentifier {
-    case email(String)
-    case phoneNumber(String)
+enum LoginType: String, CaseIterable {
+    case email = "Email"
+    case phoneNumber = "PhoneNumber"
+    
 }
 
 protocol AuthenticationService {
 
-    func login(identifier: LoginIdentifier, password: String) throws -> User
+    func login(type: LoginType,identifier: String, password: String) throws -> User
     func register(
         name: String,
         email: String,

@@ -1,6 +1,6 @@
 import Foundation
 
-class TransactionManager {
+class TransactionManager: TransactionService {
     
     
 }
