@@ -1,6 +1,85 @@
 import Foundation
 
-class AuthenticationManager {
+final class AuthenticationManager {
     
+    private let userRepository: UserRepository
     
+    init(userRepository: UserRepository) {
+        self.userRepository = userRepository
+    }
+    
+    func login(
+        identifier: LoginIdentifier,
+        password: String
+    ) throws -> User {
+        
+        let user: User
+        
+        switch identifier {
+            
+        case .email(let email):
+            guard let foundUser = userRepository.findByEmail(email)
+            else {
+                throw AuthenticationError.invalidUser
+            }
+            user = foundUser
+            
+        case .phoneNumber(let phoneNumber):
+            guard let foundUser = userRepository.findByPhoneNumber(phoneNumber)
+            else {
+                throw AuthenticationError.invalidUser
+            }
+            user = foundUser
+
+        }
+        
+        guard user.password == password else {
+            throw AuthenticationError.invalidPassword
+        }
+        
+        return user
+    }
+    
+    func register(
+        name: String,
+        email: String,
+        password: String,
+        phoneNumber: String
+    ) throws {
+        
+        if userRepository.findByEmail(email) != nil {
+            throw AuthenticationError.userAlreadyExists
+        }
+        
+        let user = User(
+            name: name,
+            email: email,
+            password: password,
+            phoneNumber: phoneNumber
+        )
+        userRepository.save(user)
+    }
+}
+
+extension AuthenticationManager {
+    
+    enum LoginIdentifier {
+        case email(String)
+        case phoneNumber(String)
+    }
+    
+    enum AuthenticationError: String, LocalizedError {
+        case invalidUser
+        case invalidPassword
+        case userAlreadyExists
+        
+        var errorDescription: String? {
+            switch self {
+            case .invalidUser: return "Invalid userName or Password"
+            case .invalidPassword: return "Invalid password"
+            case .userAlreadyExists: return "Account already exists"
+            }
+        }
+        
+    }
 }

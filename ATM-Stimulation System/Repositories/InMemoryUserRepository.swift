@@ -4,7 +4,7 @@ class InMemoryUserRepository: UserRepository {
 
     private var users: [UUID: User] = [:]
 
-    func save(user: User) {
+    func save(_ user: User) {
         users[user.id] = user
     }
 
@@ -12,11 +12,11 @@ class InMemoryUserRepository: UserRepository {
         users[userId]
     }
 
-    func findByEmail(email: String) -> User? {
+    func findByEmail(_ email: String) -> User? {
         users.values.first { $0.email == email }
     }
 
-    func findByPhoneNumber(phoneNumber: String) -> User? {
+    func findByPhoneNumber(_ phoneNumber: String) -> User? {
         users.values.first { $0.phoneNumber == phoneNumber }
     }
 

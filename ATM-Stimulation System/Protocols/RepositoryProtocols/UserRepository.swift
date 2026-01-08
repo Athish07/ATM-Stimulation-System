@@ -1,9 +1,9 @@
 import Foundation
 
 protocol UserRepository {
-    func save(user: User)
+    func save(_ user: User)
     func findById(userId: UUID) -> User?
-    func findByEmail(email: String) -> User?
-    func findByPhoneNumber(phoneNumber: String) -> User?
+    func findByEmail(_ email: String) -> User?
+    func findByPhoneNumber(_ phoneNumber: String) -> User?
     
 }
