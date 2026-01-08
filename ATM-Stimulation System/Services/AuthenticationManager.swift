@@ -1,6 +1,6 @@
 import Foundation
 
-final class AuthenticationManager {
+final class AuthenticationManager: AuthenticationService {
     
     private let userRepository: UserRepository
     
@@ -8,10 +8,7 @@ final class AuthenticationManager {
         self.userRepository = userRepository
     }
     
-    func login(
-        identifier: LoginIdentifier,
-        password: String
-    ) throws -> User {
+    func login(identifier: LoginIdentifier, password: String) throws -> User {
         
         let user: User
         
@@ -63,11 +60,6 @@ final class AuthenticationManager {
 
 extension AuthenticationManager {
     
-    enum LoginIdentifier {
-        case email(String)
-        case phoneNumber(String)
-    }
-    
     enum AuthenticationError: String, LocalizedError {
         case invalidUser
         case invalidPassword
@@ -80,6 +72,6 @@ extension AuthenticationManager {
             case .userAlreadyExists: return "Account already exists"
             }
         }
-        
     }
+    
 }
