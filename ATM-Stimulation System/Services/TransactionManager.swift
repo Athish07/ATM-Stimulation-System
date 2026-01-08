@@ -2,18 +2,18 @@ import Foundation
 
 final class TransactionManager: TransactionService {
 
+    private let currentService: any AccountTransactionService
+    private let savingsService: any AccountTransactionService
     private let transactionRepository: TransactionRepository
-    private let currentAccountRepository: CurrentAccountRepository
-    private let savingsAccountRepository: SavingsAccountRepository
-
+    
     init(
-        transactionRepository: TransactionRepository,
-        currentAccountRepository: CurrentAccountRepository,
-        savingsAccountRepository: SavingsAccountRepository
+        currentService: some AccountTransactionService,
+        savingsService: some AccountTransactionService,
+        transactionRepository: TransactionRepository
     ) {
+        self.currentService =  currentService
+        self.savingsService = savingsService
         self.transactionRepository = transactionRepository
-        self.currentAccountRepository = currentAccountRepository
-        self.savingsAccountRepository = savingsAccountRepository
     }
     
     func deposit(
@@ -22,142 +22,87 @@ final class TransactionManager: TransactionService {
         amount: Double
     ) throws {
 
-        guard amount > 0 else {
-            throw TransactionError.depositOperationFailed
-        }
-
-        switch accountType {
-        case .current:
-            try depositOnCurrentAccount(userId: userId, amount: amount)
-        case .savings:
-            try depositOnSavingsAccount(userId: userId, amount: amount)
-        }
+        let service = findService(for: accountType)
+        let account = try service.deposit(userId: userId, amount: amount)
+        
+        recordTransaction(
+            from: account.accountNumber,
+            to: account.accountNumber,
+            amount: amount,
+            type: .deposit
+        )
     }
-
+    
     func withdraw(
         userId: UUID,
         accountType: AccountType,
         amount: Double
     ) throws {
 
-        guard amount > 0 else {
+        let service = findService(for: accountType)
+        let account = try service.withdraw(userId: userId, amount: amount)
+
+        recordTransaction(
+            from: account.accountNumber,
+            to: account.accountNumber,
+            amount: amount,
+            type: .withdrawal
+        )
+    }
+    
+    func transfer(
+        fromUserId: UUID,
+        fromType: AccountType,
+        toUserId: UUID,
+        toType: AccountType,
+        amount: Double
+    ) throws {
+
+        let fromService = findService(for: fromType)
+        let toService = findService(for: toType)
+        
+        let fromAccount = try fromService.findAccount(userId: fromUserId)
+        let toAccount = try toService.findAccount(userId: toUserId)
+
+        guard fromAccount.accountNumber != toAccount.accountNumber else {
+            throw TransactionError.sameAccountTransferNotAllowed
+        }
+
+        guard fromAccount.withdraw(amount) else {
             throw TransactionError.withdrawOperationFailed
         }
 
-        switch accountType {
+        guard toAccount.deposit(amount) else {
+            _ = fromAccount.deposit(amount)
+            throw TransactionError.depositOperationFailed
+        }
+
+        recordTransaction(
+            from: fromAccount.accountNumber,
+            to: toAccount.accountNumber,
+            amount: amount,
+            type: .transfer
+        )
+    }
+
+    private func findService(for type: AccountType) -> any AccountTransactionService {
+        switch type {
         case .current:
-            try withdrawalOnCurrentAccount(userId: userId, amount: amount)
+            return currentService
         case .savings:
-            try withdrawalOnSavingsAccount(userId: userId, amount: amount)
+            return savingsService
         }
     }
-    
-    private func depositOnCurrentAccount(
-        userId: UUID,
-        amount: Double
-    ) throws {
 
-        guard let account =
-            currentAccountRepository.findByUserId(userId)
-        else {
-            throw TransactionError.accountNotFound
-        }
-
-        guard account.deposit(amount) else {
-            throw TransactionError.depositOperationFailed
-        }
-
-        currentAccountRepository.save(account)
-
-        recordTransaction(
-            amount: amount,
-            accountNumber: account.accountNumber,
-            type: .deposit
-        )
-    }
-
-    private func depositOnSavingsAccount(
-        userId: UUID,
-        amount: Double
-    ) throws {
-        
-        guard let account =
-                savingsAccountRepository.findByUserId(userId)
-        else {
-            throw TransactionError.accountNotFound
-        }
-        
-        guard account.deposit(amount) else {
-            throw TransactionError.depositOperationFailed
-        }
-        
-        savingsAccountRepository.save(account)
-        
-        recordTransaction(
-            amount: amount,
-            accountNumber: account.accountNumber,
-            type: .deposit
-        )
-        
-    }
-    
-    private func withdrawalOnCurrentAccount(
-        userId: UUID,
-        amount: Double
-    ) throws {
-
-        guard let account =
-            currentAccountRepository.findByUserId(userId)
-        else {
-            throw TransactionError.accountNotFound
-        }
-
-        guard account.withdraw(amount) else {
-            throw TransactionError.withdrawOperationFailed
-        }
-
-        currentAccountRepository.save(account)
-
-        recordTransaction(
-            amount: amount,
-            accountNumber: account.accountNumber,
-            type: .withdrawal
-        )
-        
-    }
-
-    private func withdrawalOnSavingsAccount(
-        userId: UUID,
-        amount: Double
-    ) throws {
-
-        guard let account =
-            savingsAccountRepository.findByUserId(userId)
-        else {
-            throw TransactionError.accountNotFound
-        }
-
-        guard account.withdraw(amount) else {
-            throw TransactionError.withdrawOperationFailed
-        }
-
-        savingsAccountRepository.save(account)
-
-        recordTransaction(
-            amount: amount,
-            accountNumber: account.accountNumber,
-            type: .withdrawal
-        )
-    }
-    
     private func recordTransaction(
+        from: UUID,
+        to: UUID,
         amount: Double,
-        accountNumber: UUID,
         type: TransactionType
     ) {
         let transaction = Transaction(
-            fromAccountNumber: accountNumber,
-            toAccountNumber: accountNumber,
+            fromAccountNumber: from,
+            toAccountNumber: to,
             amount: amount,
             type: type,
             status: .completed
@@ -167,27 +112,5 @@ final class TransactionManager: TransactionService {
 }
 
 extension TransactionManager {
-
-    enum AccountType {
-        case savings
-        case current
-    }
-
-    enum TransactionError: String, LocalizedError {
-        case accountNotFound
-        case depositOperationFailed
-        case withdrawOperationFailed
-
-        var errorDescription: String {
-            switch self {
-            case .accountNotFound:
-                return "Account not found for the given user."
-            case .depositOperationFailed:
-                return "Deposit operation failed."
-            case .withdrawOperationFailed:
-                return "Withdraw operation failed."
-            }
-        }
-    }
+    
 }
-

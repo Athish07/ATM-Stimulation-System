@@ -1,6 +1,6 @@
 import Foundation
 
-class SaveingsAccount: Account {
+class SavingsAccount: Account {
 
     private(set) var interestRate: Double
 

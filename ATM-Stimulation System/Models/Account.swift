@@ -25,6 +25,11 @@ class Account {
         self.minimumBalance = minimumBalance
     }
     
+    enum AccountType {
+        case savings
+        case current
+    }
+    
     func deposit(_ amount: Double) -> Bool {
         guard amount > 0 else { return false }
         balance += amount
@@ -38,7 +43,6 @@ class Account {
     func decreaseBalance(_ amount: Double) {
         balance -= amount
     }
-    
-    
 }
 
+typealias AccountType = Account.AccountType

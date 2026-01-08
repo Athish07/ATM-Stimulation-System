@@ -19,7 +19,7 @@ class CurrentAccount: Account {
             minimumBalance: minimumBalance
         )
     }
-
+    
     func withdraw(_ amount: Double) -> Bool {
         guard amount > 0 else { return false }
 
