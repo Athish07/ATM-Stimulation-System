@@ -60,7 +60,7 @@ final class AuthenticationManager: AuthenticationService {
 
 extension AuthenticationManager {
     
-    enum AuthenticationError: String, LocalizedError {
+    enum AuthenticationError: LocalizedError {
         case invalidUser
         case invalidPassword
         case userAlreadyExists

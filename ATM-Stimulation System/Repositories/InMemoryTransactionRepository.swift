@@ -2,8 +2,12 @@ import Foundation
 
 class InMemoryTransactionRepository: TransactionRepository {
     
-    private let transactions: [UUID: Transaction] = [:]
+    private var transactions: [UUID: Transaction] = [:]
 
+    func save(_ transaction: Transaction) {
+        transactions[transaction.id] = transaction
+    }
+    
     func getAll() -> [Transaction] {
         return transactions.values
             .sorted { $0.date > $1.date }

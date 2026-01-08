@@ -1,5 +1,5 @@
 let userRepository: UserRepository = InMemoryUserRepository()
-let accountRepository: AccountRepository = InMemoryAccountRepository()
+let currentAccountRepository: CurrentAccountRepository = InMemoryCurrentAccountRepository()
 let transactionRepository: TransactionRepository =
     InMemoryTransactionRepository()
 

@@ -8,8 +8,8 @@ class InMemoryUserRepository: UserRepository {
         users[user.id] = user
     }
 
-    func findById(userId: UUID) -> User? {
-        users[userId]
+    func findById(_ id: UUID) -> User? {
+        users[id]
     }
 
     func findByEmail(_ email: String) -> User? {
@@ -19,5 +19,6 @@ class InMemoryUserRepository: UserRepository {
     func findByPhoneNumber(_ phoneNumber: String) -> User? {
         users.values.first { $0.phoneNumber == phoneNumber }
     }
+    
 
 }
