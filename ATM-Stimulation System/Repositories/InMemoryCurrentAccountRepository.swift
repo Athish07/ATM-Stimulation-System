@@ -1,15 +1,19 @@
 import Foundation
 
-class InMemoryCurrentAccountRepository: CurrentAccountRepository {
-    
-    private var currentAccounts: [UUID: CurrentAccount] = [:]
+final class InMemoryCurrentAccountRepository: CurrentAccountRepository {
+
+    private var storage: [UUID: CurrentAccount] = [:]
 
     func save(_ account: CurrentAccount) {
-        currentAccounts[account.accountNumber] = account
+        storage[account.accountNumber] = account
+    }
+
+    func findByAccountNumber(_ id: UUID) -> CurrentAccount? {
+        storage[id]
     }
 
     func findByUserId(_ userId: UUID) -> CurrentAccount? {
-        currentAccounts.values.first { $0.userId == userId }
+        storage.values.first { $0.userId == userId }
     }
-
 }
+

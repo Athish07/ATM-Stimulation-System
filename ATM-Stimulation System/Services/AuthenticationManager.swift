@@ -30,7 +30,7 @@ final class AuthenticationManager: AuthenticationService {
 
         }
         
-        guard user.password == password else {
+        guard user.verifyPassword(password) else {
             throw AuthenticationError.invalidPassword
         }
         

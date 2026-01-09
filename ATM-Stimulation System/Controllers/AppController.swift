@@ -3,19 +3,19 @@ import Foundation
 class AppController {
 
     private let authenticationService: AuthenticationService
-    private let transactionService: TransactionService
     private let userService: UserService
+    private let accountService: AccountService
 
     init(
         authenticationService: AuthenticationService,
-        transactionService: TransactionService,
-        userService: UserService
+        userService: UserService,
+        accountService: AccountService
     ) {
         self.authenticationService = authenticationService
-        self.transactionService = transactionService
         self.userService = userService
+        self.accountService = accountService
     }
-
+    
     func start() {
 
         while true {
@@ -74,7 +74,7 @@ class AppController {
             let userController = UserController(
                 userId: user.id,
                 userService: userService,
-                transactionService: transactionService
+                accountService: accountService
             )
             userController.start()
 

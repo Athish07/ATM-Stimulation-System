@@ -8,29 +8,20 @@ let savingAccountRepository: SavingsAccountRepository =
 let transactionRepository: TransactionRepository =
     InMemoryTransactionRepository()
 
-let currentAccountService: CurrentAccountService =  CurrentAccountManager(
-    repository: currentAccountRepository
-)
-
-let savingAccountService: SavingsAccountService = SavingsAccountManager(
-    repository: savingAccountRepository
-)
-
 let authenticationService: AuthenticationService = AuthenticationManager(
     userRepository: userRepository
 )
+let userService: UserService = UserManager(userRepository: userRepository)
 
-let transactionService: TransactionService = TransactionManager(
-    currentService: currentAccountService,
-    savingsService: savingAccountService,
+let accountService: AccountService = AccountManager(
+    currentAccountRepository: currentAccountRepository,
+    savingsAccountRepository: savingAccountRepository,
     transactionRepository: transactionRepository
 )
 
-let userService: UserService = UserManager(userRepository: userRepository)
-
 let appController = AppController(
     authenticationService: authenticationService,
-    transactionService: transactionService,
-    userService: userService
+    userService: userService,
+    accountService: accountService
 )
 appController.start()

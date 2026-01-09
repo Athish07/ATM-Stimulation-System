@@ -5,7 +5,7 @@ struct User: Equatable {
     let id: UUID
     let name: String
     let email: String
-    let password: String
+    private let passwordHash: String
     let phoneNumber: String
 
     init(
@@ -18,7 +18,16 @@ struct User: Equatable {
         self.id = id
         self.name = name
         self.email = email
-        self.password = password
+        self.passwordHash = SecretHasher.hash(password)
         self.phoneNumber = phoneNumber
     }
+    
 }
+
+extension User {
+
+    func verifyPassword(_ password: String) -> Bool {
+        SecretHasher.verify(password,against: passwordHash)
+    }
+}
+

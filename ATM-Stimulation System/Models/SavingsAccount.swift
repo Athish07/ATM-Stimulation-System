@@ -1,49 +1,35 @@
 import Foundation
 
 struct SavingsAccount {
-
-    private(set) var interestRate: Double
-    private var account: Account
+    
+    private(set) var account: Account
 
     init(
         bankName: String,
         userId: UUID,
         bankLocation: String,
-        minimumBalance: Double = 1000,
-        interestRate: Double
+        pin: String,
+        minimumBalance: Double = 2000
     ) {
-        self.interestRate = interestRate
         self.account = Account(
             bankName: bankName,
             userId: userId,
             bankLocation: bankLocation,
-            minimumBalance: minimumBalance
+            minimumBalance: minimumBalance,
+            pin: pin
         )
     }
-    
+
+    var balance: Double { account.balance }
     var accountNumber: UUID { account.accountNumber }
     var userId: UUID { account.userId }
-    var bankName: String { account.bankName }
-    var bankLocation: String { account.bankLocation }
-    var openedDate: Date { account.openedDate }
-    var minimumBalance: Double { account.minimumBalance }
-    var balance: Double { account.balance }
-    
-    mutating func withdraw(_ amount: Double) -> Bool {
-        guard amount > 0 else { return false }
 
-        let newBalance = balance - amount
-
-        if newBalance >= minimumBalance {
-            account.decreaseBalance(amount)
-            return true
-        }
-        
-        return false
+    mutating func deposit(_ amount: Double) -> Bool {
+        account.deposit(amount)
     }
-    
-//    func calculateInterestOnQuartely() -> Double {
-//        ((balance * interestRate) / 365) * 90
-//    }
 
+    mutating func withdraw(_ amount: Double) -> Bool {
+        account.withdraw(amount)
+    }
 }
+

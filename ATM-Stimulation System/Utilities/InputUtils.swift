@@ -77,7 +77,7 @@ struct InputUtils {
               let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
               
               if (phoneNumber.isEmpty && allowCancel) || !phoneTest.evaluate(with: phoneNumber) {
-                  print("Invalid PhoneNumber formate. Example formate (000-000-0000)")
+                  print("Invalid PhoneNumber formate. Example formate (000-0000-0000)")
                   continue
               }
               
