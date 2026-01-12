@@ -5,6 +5,8 @@ final class CurrentAccountManager: AccountService {
     private let repository: AccountRepository
     private let minimumBalance: Double = 5000
     private let overDraftLimit: Double = 5000
+    
+    let supportedAccountType: AccountType = .current
 
     init(repository: AccountRepository) {
         self.repository = repository
@@ -19,7 +21,7 @@ final class CurrentAccountManager: AccountService {
         userId: UUID,
         bankLocation: String,
         pin: String
-    ) -> CurrentAccount {
+    ) -> Account {
 
         let account = CurrentAccount(
             bankName: bankName,

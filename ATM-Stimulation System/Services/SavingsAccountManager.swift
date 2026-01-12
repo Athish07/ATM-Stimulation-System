@@ -5,6 +5,8 @@ final class SavingsAccountManager: AccountService {
     private let repository: AccountRepository
     private let interestRate: Double = 0.85
     private let minimumBalance: Double = 1000
+    
+    let supportedAccountType: AccountType = .savings
 
     init(repository: AccountRepository) {
         self.repository = repository
@@ -19,7 +21,7 @@ final class SavingsAccountManager: AccountService {
         userId: UUID,
         bankLocation: String,
         pin: String
-    ) -> SavingsAccount {
+    ) -> Account {
 
         let account = SavingsAccount(
             bankName: bankName,

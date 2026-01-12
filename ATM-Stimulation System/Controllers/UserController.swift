@@ -56,6 +56,7 @@ final class UserController {
             options: AccountType.allCases,
             title: "Select Account Type"
         )
+        
         guard
             let accountType = InputUtils.readMenuChoice(
                 from: AccountType.allCases
@@ -68,6 +69,7 @@ final class UserController {
         let pin = readAndValidatePin()
 
         do {
+
             let account = try accountCoordinator.createAccount(
                 bankName: bankName,
                 userId: userId,
@@ -75,9 +77,12 @@ final class UserController {
                 bankLocation: bankLocation,
                 pin: pin
             )
-            
+
             print("\n Account Created Successfully.")
-            OutputUtils.displayAccountDetails(account: account, accountType: accountType.rawValue)
+            OutputUtils.displayAccountDetails(
+                account: account,
+                accountType: accountType.rawValue
+            )
 
         } catch {
             print(error.localizedDescription)
@@ -92,7 +97,7 @@ final class UserController {
                 return
             }
             
-            let amount = try readPositiveAmount("Enter amount to deposit")
+            let amount = readPositiveAmount("Enter amount to deposit")
             let pin = InputUtils.readString("Enter PIN")
 
             try accountCoordinator.deposit(
@@ -115,7 +120,7 @@ final class UserController {
                 return
             }
             
-            let amount = try readPositiveAmount("Enter amount to withdraw")
+            let amount = readPositiveAmount("Enter amount to withdraw")
             let pin = InputUtils.readString("Enter PIN")
 
             try accountCoordinator.withdraw(
@@ -135,7 +140,7 @@ final class UserController {
     private func transfer() {
         do {
             print("\n---- Money Transfer ----------")
-            print("Selects the accounts to transfer amount.")
+            print("Select the accounts to transfer amount.")
             
             guard let source = try selectAccount(),
                 let destination = try selectAccount()
@@ -148,7 +153,7 @@ final class UserController {
                 return
             }
 
-            let amount = try readPositiveAmount("Enter a amount to transfer")
+            let amount = readPositiveAmount("Enter a amount to transfer")
             let pin = InputUtils.readString("Enter PIN")
 
             try accountCoordinator.transfer(
@@ -179,9 +184,12 @@ final class UserController {
         }
 
         print("\n=== Your Accounts ===")
-        for acc in accounts {
-            let type = (acc is CurrentAccount) ? "Current" : "Savings"
-            OutputUtils.displayAccountDetails(account: acc, accountType: type)
+        for account in accounts {
+            let type = (account is CurrentAccount) ? "Current" : "Savings"
+            OutputUtils.displayAccountDetails(
+                account: account,
+                accountType: type
+            )
         }
     }
     
@@ -272,6 +280,7 @@ extension UserController {
 
     private func readAndValidatePin() -> String {
         while true {
+
             let pin = InputUtils.readString("Enter PIN (4-6 digits)")
             let confirm = InputUtils.readString("Confirm PIN")
 
@@ -281,13 +290,21 @@ extension UserController {
                 return pin
             }
             print("PINs do not match or invalid format. Try again.")
+            
         }
     }
     
-    private func readPositiveAmount(_ prompt: String) throws -> Double {
-        let amount = InputUtils.readDouble(prompt)
-        guard amount > 0 else { throw AccountError.invalidAmount }
-        return amount
+    private func readPositiveAmount(_ prompt: String) -> Double {
+        
+        while true {
+            let amount = InputUtils.readDouble(prompt)
+            if amount < 0 {
+                print("Amount cannot be a negative value, try again.")
+                continue
+            }
+            return amount
+        }
+        
     }
     
     private func selectAccount() throws -> Account? {
@@ -302,7 +319,7 @@ extension UserController {
             let last4 = String(acc.accountNumber.uuidString.suffix(4))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
             print(
-                "\(index + 1). \(acc.bankName)*****\(last4) (\(type))"
+                "\(index + 1). \(acc.bankName)XXX-XXX-\(last4) (\(type))"
             )
         }
         
@@ -313,8 +330,6 @@ extension UserController {
         return account
         
     }
-    
-    
     
 }
 

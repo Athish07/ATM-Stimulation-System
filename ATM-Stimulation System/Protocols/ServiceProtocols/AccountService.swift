@@ -1,6 +1,14 @@
 import Foundation
 
 protocol AccountService {
+    
+    func createAccount(
+            bankName: String,
+            userId: UUID,
+            bankLocation: String,
+            pin: String
+        ) -> Account
+    
     func deposit(
         to accountNumber: UUID,
         pin: String,
@@ -14,6 +22,7 @@ protocol AccountService {
     ) throws
 
     func owns(accountNumber: UUID) -> Bool
+    var supportedAccountType: AccountType { get }
 }
 
 extension AccountService {

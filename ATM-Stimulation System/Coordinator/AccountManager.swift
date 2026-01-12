@@ -19,42 +19,21 @@ final class AccountManager: AccountCoordinator {
         bankLocation: String,
         pin: String
     ) throws -> Account {
-        switch accountType {
-        case .current:
-            guard
-                let currentService =
-                    (services.first {
-                        $0 is CurrentAccountManager
-                    })
-                    as? CurrentAccountManager
-            else {
-                throw AccountError.serviceNotAvailable
-            }
 
-            return currentService.createAccount(
-                bankName: bankName,
-                userId: userId,
-                bankLocation: bankLocation,
-                pin: pin
+        guard
+            let service = services.first(
+                where: { $0.supportedAccountType == accountType }
             )
-
-        case .savings:
-            guard
-                let savingsService =
-                    (services.first {
-                        $0 is SavingsAccountManager
-                    })
-                    as? SavingsAccountManager
-            else {
-                throw AccountError.serviceNotAvailable
-            }
-            return savingsService.createAccount(
-                bankName: bankName,
-                userId: userId,
-                bankLocation: bankLocation,
-                pin: pin
-            )
+        else {
+            throw AccountError.serviceNotAvailable
         }
+
+        return service.createAccount(
+            bankName: bankName,
+            userId: userId,
+            bankLocation: bankLocation,
+            pin: pin
+        )
     }
 
     func deposit(
@@ -62,11 +41,11 @@ final class AccountManager: AccountCoordinator {
         pin: String,
         amount: Double
     ) throws {
-
+        
         guard let service = service(for: accountNumber) else {
             throw AccountError.accountNotFound
         }
-
+        
         do {
             try service.deposit(to: accountNumber, pin: pin, amount: amount)
             
@@ -86,13 +65,13 @@ final class AccountManager: AccountCoordinator {
             throw error
         }
     }
-
+    
     func withdraw(
         from accountNumber: UUID,
         pin: String,
         amount: Double
     ) throws {
-
+        
         guard let service = service(for: accountNumber) else {
             throw AccountError.accountNotFound
         }
@@ -114,40 +93,38 @@ final class AccountManager: AccountCoordinator {
             throw error
         }
     }
-
+    
     func transfer(
         from source: UUID,
         to destination: UUID,
         pin: String,
         amount: Double
     ) throws {
-
+        
+        try withdraw(from: source, pin: pin, amount: amount)
+        
         do {
-            try withdraw(from: source, pin: pin, amount: amount)
-
-            do {
-                try deposit(to: destination, pin: pin, amount: amount)
-                
-                recordTransaction(
-                    accountNumber: source,
-                    counterAccountNumber: destination,
-                    amount: -amount,
-                    type: .transfer
-                )
-
-                recordTransaction(
-                    accountNumber: destination,
-                    counterAccountNumber: source,
-                    amount: amount,
-                    type: .transfer
-                )
-            } catch {
-                try? deposit(to: source, pin: pin, amount: amount)
-                throw error
-            }
+            try deposit(to: destination, pin: pin, amount: amount)
+            
         } catch {
+            try? deposit(to: source, pin: pin, amount: amount)
             throw error
         }
+        
+        recordTransaction(
+            accountNumber: source,
+            counterAccountNumber: destination,
+            amount: -amount,
+            type: .transfer
+        )
+        
+        recordTransaction(
+            accountNumber: destination,
+            counterAccountNumber: source,
+            amount: amount,
+            type: .transfer
+        )
+        
     }
     
     func getAccounts(for userId: UUID) -> [Account] {
