@@ -96,7 +96,7 @@ final class UserController {
             guard let account = try selectAccount() else {
                 return
             }
-
+            
             let amount = readPositiveAmount("Enter amount to deposit")
             let pin = InputUtils.readString("Enter PIN")
 
@@ -117,19 +117,20 @@ final class UserController {
 
     private func withdraw() {
         do {
+            
             guard let account = try selectAccount() else {
                 return
             }
-
+            
             let amount = readPositiveAmount("Enter amount to withdraw")
             let pin = InputUtils.readString("Enter PIN")
-
+            
             try accountCoordinator.withdraw(
                 from: account.accountNumber,
                 pin: pin,
                 amount: amount
             )
-
+            
             print(
                 "\nWithdrawal successful! New balance:\(account.balance)"
             )
@@ -242,7 +243,7 @@ final class UserController {
             password: user.passwordHash,
             phoneNumber: phoneNumber
         )
-
+        
         do {
 
             try userService.updateProfile(updatedUser)
@@ -250,12 +251,11 @@ final class UserController {
         } catch {
             print(error.localizedDescription)
         }
-
+        
     }
 
     private func transactionHistory() {
-        print("\n=== Transaction History ===\n")
-
+        
         do {
 
             guard let account = try selectAccount() else {
