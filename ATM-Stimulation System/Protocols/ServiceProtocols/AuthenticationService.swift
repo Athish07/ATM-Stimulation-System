@@ -2,7 +2,7 @@ import Foundation
 
 enum LoginType: String, CaseIterable {
     case email = "Email"
-    case phoneNumber = "PhoneNumber"
+    case phoneNumber = "Phone Number"
     
 }
 

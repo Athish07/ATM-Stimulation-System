@@ -40,5 +40,5 @@ class CurrentAccount: Account {
         }
         return false
     }
-
+    
 }

@@ -23,8 +23,6 @@ struct DatabaseSeeder {
             bankLocation: "Chennai",
             pin: "1111"
         )
-        
-        
     }
 
 }

@@ -58,7 +58,7 @@ class AppController {
         case .email:
             identifier = InputUtils.readString("Enter email")
         case .phoneNumber:
-            identifier = InputUtils.readString("Enter phoneNumber")
+            identifier = InputUtils.readString("Enter phone Number")
         }
         let password = InputUtils.readString("Enter password")
         
@@ -126,5 +126,5 @@ extension AppController {
         case register = "Registration"
         case exit = "Exit application"
     }
-
+    
 }

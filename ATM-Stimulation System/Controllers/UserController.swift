@@ -232,7 +232,7 @@ final class UserController {
             allowCancel: true
         )
         let phoneNumber = InputUtils.readPhoneNumber(
-            "Enter PhoneNumber(current phoneNumber: \(user.phoneNumber))",
+            "Enter Phone Number(current phone Number: \(user.phoneNumber))",
             allowCancel: true
         )
 

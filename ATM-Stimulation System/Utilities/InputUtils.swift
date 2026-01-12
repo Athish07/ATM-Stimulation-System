@@ -98,7 +98,7 @@ struct InputUtils {
               }
                     
               if !phoneTest.evaluate(with: phoneNumber) {
-                  print("Invalid PhoneNumber")
+                  print("Invalid Phone Number")
                   continue
               }
               
@@ -152,7 +152,6 @@ struct InputUtils {
 
             print("\nPassword requirements not met:")
             errors.forEach { print($0) }
-            print()
         }
     }
     

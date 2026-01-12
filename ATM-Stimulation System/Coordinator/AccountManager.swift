@@ -125,11 +125,11 @@ final class AccountManager: AccountCoordinator {
         )
         
     }
-
+    
     func getAccounts(for userId: UUID) -> [Account] {
         accountRepository.findByUserId(userId)
     }
-
+    
     func getTransactionHistory(for accountNumber: UUID) -> [Transaction] {
         transactionRepository.findByAccountNumber(accountNumber)
     }
@@ -137,7 +137,7 @@ final class AccountManager: AccountCoordinator {
 }
 
 extension AccountManager {
-
+    
     private func service(
         for accountNumber: UUID
     ) -> AccountService? {
