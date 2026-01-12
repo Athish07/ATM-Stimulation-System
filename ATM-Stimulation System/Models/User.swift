@@ -22,4 +22,18 @@ struct User: Equatable {
         self.phoneNumber = phoneNumber
     }
     
+    init(
+            id: UUID,
+            name: String,
+            email: String,
+            passwordHash: String,
+            phoneNumber: String
+        ) {
+            self.id = id
+            self.name = name
+            self.email = email
+            self.passwordHash = passwordHash
+            self.phoneNumber = phoneNumber
+        }
+    
 }

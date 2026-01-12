@@ -4,13 +4,16 @@ class AppController {
 
     private let authenticationService: AuthenticationService
     private let userService: UserService
+    private let accountCoordinator: AccountCoordinator
 
     init(
         authenticationService: AuthenticationService,
-        userService: UserService
+        userService: UserService,
+        accountCoordinator: AccountCoordinator
     ) {
         self.authenticationService = authenticationService
         self.userService = userService
+        self.accountCoordinator = accountCoordinator
     }
 
     func start() {
@@ -67,7 +70,12 @@ class AppController {
                 password: password
             )
             print("\nUser login successful, welocome \(user.name)")
-            
+            UserController(
+                userId: user.id,
+                userService: userService,
+                accountCoordinator: accountCoordinator
+            ).start()
+
         } catch {
             print(error.localizedDescription)
         }

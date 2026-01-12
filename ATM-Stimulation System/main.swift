@@ -6,11 +6,29 @@ let transactionRepository: TransactionRepository =
 let authenticationService: AuthenticationService = AuthenticationManager(
     userRepository: userRepository
 )
+let savingsAccountService: AccountService =
+    SavingsAccountManager(repository: accountRepository)
 
-let userService: UserService = UserManager()
+let currentAccountService: AccountService =
+    CurrentAccountManager(repository: accountRepository)
+
+let accountCoordinator: AccountCoordinator =
+    AccountManager(
+        services: [
+            savingsAccountService,
+            currentAccountService,
+        ],
+        accountRepository: accountRepository,
+        transactionRepository: transactionRepository
+    )
+
+let userService: UserService = UserManager(
+    userRepository: userRepository
+)
 
 let appController = AppController(
     authenticationService: authenticationService,
-    userService: userService
+    userService: userService,
+    accountCoordinator: accountCoordinator
 )
 appController.start()

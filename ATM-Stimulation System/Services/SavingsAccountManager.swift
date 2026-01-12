@@ -1,6 +1,6 @@
 import Foundation
 
-final class SavingsAccountService: AccountService {
+final class SavingsAccountManager: AccountService {
 
     private let repository: AccountRepository
     private let interestRate: Double = 0.85
@@ -82,17 +82,5 @@ final class SavingsAccountService: AccountService {
 
         repository.save(account)
     }
-
-    //    func calculateQuarterlyInterest(
-    //        for accountNumber: UUID
-    //    ) throws -> Double {
-    //
-    //        guard let account = repository.findByNumber(accountNumber) as? SavingsAccount
-    //        else {
-    //            throw AccountError.accountNotFound
-    //        }
-    //
-    //        return account.calculateInterestOnQuartely()
-    //    }
-
+    
 }

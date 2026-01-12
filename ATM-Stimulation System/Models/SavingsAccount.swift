@@ -35,8 +35,4 @@ class SavingsAccount: Account {
         return false
     }
     
-    func calculateInterestOnQuartely() -> Double {
-        ((balance * interestRate) / 365) * 90
-    }
-    
 }

@@ -3,7 +3,7 @@ import Foundation
 struct Transaction {
     
     let id: UUID
-    let accoutNumber: UUID
+    let accountNumber: UUID
     let counterAccountNumber: UUID?
     let amount: Double
     let type: TransactionType
@@ -11,32 +11,48 @@ struct Transaction {
     let date: Date
 
     init(
-        accoutNumber: UUID,
+        accountNumber: UUID,
         counterAccountNumber: UUID? = nil,
         amount: Double,
         type: TransactionType,
         status: TransactionStatus
     ) {
         self.id = UUID()
-        self.accoutNumber = accoutNumber
+        self.accountNumber = accountNumber
         self.counterAccountNumber = counterAccountNumber
         self.date = Date()
         self.amount = amount
         self.type = type
         self.status = status
     }
+    
+    func description() -> String {
 
+        let counterAccountText =
+            counterAccountNumber?.uuidString ?? "N/A"
+
+        return """
+            Transaction ID : \(id.uuidString.suffix(5))
+            Type           : \(type.rawValue)
+            Amount         : \(amount)
+            Status         : \(status)
+            Account        : \(accountNumber)
+            Counter Acc    : \(counterAccountText)
+            Date           : \(date.formatted())
+            ----------------------------------------
+            """
+    }
 }
 
 extension Transaction {
     
-    enum TransactionType {
-        case deposit
-        case withdrawal
-        case transfer
+    enum TransactionType: String {
+        case deposit = "Deposite"
+        case withdrawal = "Withdrawal"
+        case transfer = "Transfer"
     }
 
-    enum TransactionStatus {
+    enum TransactionStatus{
         case completed
         case failed(reason: String)
     }

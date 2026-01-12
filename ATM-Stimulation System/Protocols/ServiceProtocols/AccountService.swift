@@ -32,7 +32,7 @@ enum AccountError: LocalizedError {
     case insufficientBalance
     case overdraftLimitExceeded
     case serviceNotAvailable
-
+    
     var errorDescription: String? {
         switch self {
         case .accountNotFound:
@@ -47,5 +47,6 @@ enum AccountError: LocalizedError {
             return "Overdraft limit exceeded."
         case .serviceNotAvailable:
             return "Unexpected error occured."
+        }
     }
 }

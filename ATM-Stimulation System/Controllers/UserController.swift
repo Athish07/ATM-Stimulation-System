@@ -28,16 +28,19 @@ final class UserController {
                 continue
             }
 
-            //            switch choice {
-            //            case .createAccount: createAccount()
-            //            case .deposit: deposit()
-            //            case .withdraw: withdraw()
-            //            case .transfer: transfer()
-            //            case .viewProfile: viewProfile()
-            //            case .updateProfile: updateProfile()
-            //            acase .transactionHistory: transactionHistory()
-            //            case .logout: return
-            //            }
+            switch choice {
+            case .createAccount: createAccount()
+            case .deposit: deposit()
+            case .withdraw: withdraw()
+            case .transfer: transfer()
+            case .viewAccounts: viewAccounts()
+            case .viewProfile: viewProfile()
+            case .updateProfile: updateProfile()
+            case .transactionHistory: transactionHistory()
+            case .logout:
+                print("Thanks for useing the application.")
+                return
+            }
 
         }
     }
@@ -189,9 +192,86 @@ final class UserController {
                 """
             )
         }
-        print("")
     }
+    
+    private func viewProfile() {
+        
+        guard let user = userService.getUserById(userId) else {
+            print("Unable to load the details...")
+            return
+        }
+        
+        print (
+            """
+            Name: \(user.name)
+            Email: \(user.email)
+            PhnoneNumber: \(user.phoneNumber)
+            """
+        )
+    }
+    
+    private func updateProfile() {
+        
+        guard let user = userService.getUserById(userId) else {
+            print("User not found")
+            return
+        }
 
+        print("press ENTER if you want to keep the same details:")
+
+        let name = InputUtils.readString(
+            "Enter Name(current Name \(user.name))",
+            allowCancel: true
+        )
+        let email = InputUtils.readEmail(
+            "Enter Email(current Email \(user.email))",
+            allowCancel: true
+        )
+        let phoneNumber = InputUtils.readPhoneNumber(
+            "Enter PhoneNumber(current phoneNumber \(user.phoneNumber))",
+            allowCancel: true
+        )
+
+        let updatedUser = User(
+            id: user.id,
+            name: name,
+            email: email,
+            password: user.passwordHash,
+            phoneNumber: phoneNumber
+        )
+
+        do {
+
+            try userService.updateProfile(updatedUser)
+            print("User updated successfully.")
+        } catch {
+            print(error.localizedDescription)
+        }
+
+    }
+    
+    private func transactionHistory() {
+        print("\n=== Transaction History ===\n")
+        
+        do {
+            let account = try selectAccount()
+            
+            let history = accountCoordinator.getTransactionHistory(for: account.accountNumber)
+            
+            if history.isEmpty {
+                print("\nNo transactions yet.\n")
+                return
+            }
+            print("\n=== Transaction History ===\n")
+            
+            for (index, transaction) in history.enumerated() {
+                print("\(index + 1). \(transaction.description())")
+            }
+            
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 }
 
 extension UserController {
