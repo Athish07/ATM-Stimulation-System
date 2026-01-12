@@ -1,11 +1,11 @@
 import Foundation
 
 final class AccountManager: AccountCoordinator {
-
+    
     private let services: [AccountService]
     private let accountRepository: AccountRepository
     private let transactionRepository: TransactionRepository
-
+    
     init(services: [AccountService], accountRepository: AccountRepository, transactionRepository: TransactionRepository) {
         self.services = services
         self.accountRepository = accountRepository
@@ -19,15 +19,14 @@ final class AccountManager: AccountCoordinator {
         bankLocation: String,
         pin: String
     ) throws -> Account {
-
+        
         guard
-            let service = services.first(
-                where: { $0.supportedAccountType == accountType }
-            )
+            let service =
+                (services.first { $0.supportedAccountType == accountType })
         else {
             throw AccountError.serviceNotAvailable
         }
-
+        
         return service.createAccount(
             bankName: bankName,
             userId: userId,
@@ -35,7 +34,7 @@ final class AccountManager: AccountCoordinator {
             pin: pin
         )
     }
-
+    
     func deposit(
         to accountNumber: UUID,
         pin: String,
@@ -117,7 +116,7 @@ final class AccountManager: AccountCoordinator {
             amount: -amount,
             type: .transfer
         )
-        
+
         recordTransaction(
             accountNumber: destination,
             counterAccountNumber: source,
@@ -126,15 +125,19 @@ final class AccountManager: AccountCoordinator {
         )
         
     }
-    
+
     func getAccounts(for userId: UUID) -> [Account] {
-            accountRepository.findByUserId(userId)
+        accountRepository.findByUserId(userId)
     }
-    
+
     func getTransactionHistory(for accountNumber: UUID) -> [Transaction] {
         transactionRepository.findByAccountNumber(accountNumber)
     }
     
+}
+
+extension AccountManager {
+
     private func service(
         for accountNumber: UUID
     ) -> AccountService? {
@@ -157,6 +160,5 @@ final class AccountManager: AccountCoordinator {
         )
         transactionRepository.save(transaction)
     }
-    
-}
 
+}

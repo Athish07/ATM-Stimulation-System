@@ -42,7 +42,7 @@ final class SavingsAccountManager: AccountService {
         amount: Double
     ) throws {
 
-        guard amount > 0 else {
+        if amount < 0 {
             throw AccountError.invalidAmount
         }
 
@@ -65,10 +65,10 @@ final class SavingsAccountManager: AccountService {
         amount: Double
     ) throws {
 
-        guard amount > 0 else {
+        if amount < 0 {
             throw AccountError.invalidAmount
         }
-
+        
         guard
             let account = repository.findByNumber(accountNumber)
                 as? SavingsAccount
@@ -81,8 +81,9 @@ final class SavingsAccountManager: AccountService {
         guard account.withdraw(amount) else {
             throw AccountError.insufficientBalance
         }
-
+        
         repository.save(account)
+        
     }
     
 }

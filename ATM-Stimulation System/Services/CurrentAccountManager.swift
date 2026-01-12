@@ -41,31 +41,31 @@ final class CurrentAccountManager: AccountService {
         pin: String,
         amount: Double
     ) throws {
-
-        guard amount > 0 else {
+        
+        if amount < 0 {
             throw AccountError.invalidAmount
         }
-
+        
         guard
             let account = repository.findByNumber(accountNumber)
                 as? CurrentAccount
         else {
             throw AccountError.accountNotFound
         }
-
+        
         try verifyPin(pinHash: account.pinHash, pin: pin)
-
+        
         account.deposit(amount)
         repository.save(account)
     }
-
+    
     func withdraw(
         from accountNumber: UUID,
         pin: String,
         amount: Double
     ) throws {
 
-        guard amount > 0 else {
+        if amount < 0 {
             throw AccountError.invalidAmount
         }
 

@@ -23,7 +23,9 @@ class SavingsAccount: Account {
     }
     
     func withdraw(_ amount: Double) -> Bool {
-        guard amount > 0 else { return false }
+        if amount < 0 {
+            return false
+        }
         
         let newBalance = balance - amount
         

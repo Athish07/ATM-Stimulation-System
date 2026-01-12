@@ -91,10 +91,11 @@ class AppController {
         let password = InputUtils.readPassword("Enter password")
         let confirm = InputUtils.readPassword("Confirm password")
 
-        guard password == confirm else {
+        if password != confirm {
             print("Passwords dosen't match.")
             return
         }
+        
         let phoneNumber = InputUtils.readPhoneNumber("Enter phone number")
 
         do {

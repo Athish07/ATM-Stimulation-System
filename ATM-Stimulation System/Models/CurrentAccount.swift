@@ -2,7 +2,7 @@ import Foundation
 
 class CurrentAccount: Account {
 
-    private(set) var overDraftLimit: Double?
+    private(set) var overDraftLimit: Double
 
     init(
         bankName: String,
@@ -10,7 +10,7 @@ class CurrentAccount: Account {
         bankLocation: String,
         minimumBalance: Double,
         pin: String,
-        overDraftLimit: Double?
+        overDraftLimit: Double
     ) {
         self.overDraftLimit = overDraftLimit
         super.init(
@@ -23,7 +23,9 @@ class CurrentAccount: Account {
     }
 
     func withdraw(_ amount: Double) -> Bool {
-        guard amount > 0 else { return false }
+        if amount < 0 {
+            return false
+        }
 
         let newBalance = balance - amount
 
@@ -32,7 +34,7 @@ class CurrentAccount: Account {
             return true
         }
         
-        if let limit = overDraftLimit, newBalance >= -limit {
+        if newBalance >= -overDraftLimit {
             decreaseBalance(amount)
             return true
         }

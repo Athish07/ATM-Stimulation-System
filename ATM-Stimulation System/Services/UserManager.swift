@@ -31,7 +31,7 @@ final class UserManager: UserService {
         if merged == existing {
             throw UserManagerError.noChangeDetected
         }
-
+        
         userRepository.save(merged)
 
     }
