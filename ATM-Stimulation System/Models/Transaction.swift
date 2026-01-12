@@ -28,16 +28,14 @@ struct Transaction {
     
     func description() -> String {
 
-        let counterAccountText =
-            counterAccountNumber?.uuidString ?? "N/A"
+        let counterAccountText = (counterAccountNumber?.uuidString.suffix(5)) ?? "N/A"
 
         return """
-            Transaction ID : \(id.uuidString.suffix(5))
             Type           : \(type.rawValue)
             Amount         : \(amount)
             Status         : \(status)
-            Account        : \(accountNumber)
-            Counter Acc    : \(counterAccountText)
+            Account        : XXX-XXX-\(accountNumber.uuidString.suffix(5))
+            Counter Acc    : XXX-XXX-\(counterAccountText)
             Date           : \(date.formatted())
             ----------------------------------------
             """

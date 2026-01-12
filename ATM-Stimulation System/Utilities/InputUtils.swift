@@ -71,13 +71,15 @@ struct InputUtils {
                 emailFormat
             )
 
-            if (email.isEmpty && allowCancel)
-                || !emailPredicate.evaluate(with: email)
-            {
+            if (email.isEmpty && allowCancel) {
+                return email
+            }
+            
+            if !emailPredicate.evaluate(with: email) {
                 print("Enter a valid email.")
                 continue
             }
-
+            
             return email
         }
     }
@@ -91,7 +93,11 @@ struct InputUtils {
               let PHONE_REGEX = "^\\d{10}$"
               let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
               
-              if (phoneNumber.isEmpty && allowCancel) || !phoneTest.evaluate(with: phoneNumber) {
+              if (phoneNumber.isEmpty && allowCancel) {
+                  return phoneNumber
+              }
+                    
+              if !phoneTest.evaluate(with: phoneNumber) {
                   print("Invalid PhoneNumber formate. Example formate (000-000-0000)")
                   continue
               }
@@ -115,8 +121,11 @@ struct InputUtils {
                 passwordRegx
             )
 
-            if (password.isEmpty && allowCancel)
-                || !passwordCheck.evaluate(with: password)
+            if (password.isEmpty && allowCancel) {
+                return password
+            }
+            
+            if !passwordCheck.evaluate(with: password)
             {
                 print(
                     """
@@ -148,7 +157,6 @@ struct InputUtils {
         
         while true {
             
-            print(prompt, terminator: ": ")
             guard let index = readInt(prompt, allowCancel: true) else {
                 return nil
             }

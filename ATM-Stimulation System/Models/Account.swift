@@ -1,10 +1,5 @@
 import Foundation
 
-enum AccountType: String, CaseIterable {
-    case current = "Current"
-    case savings = "Savings"
-}
-
 class Account {
 
     let accountNumber: UUID
@@ -45,5 +40,10 @@ class Account {
         let str = accountNumber.uuidString
         return "XXXX-XXXX-XXXX-" + String(str.suffix(12))
     }
-    
 }
+
+public enum AccountType: String, CaseIterable {
+    case current = "Current"
+    case savings = "Savings"
+}
+

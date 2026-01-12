@@ -18,18 +18,16 @@ final class UserManager: UserService {
         }
         
         let merged = User(
-            id: existing.id,
+            id: updatedUser.id,
             name: updatedUser.name.isEmpty ? existing.name : updatedUser.name,
             email: updatedUser.email.isEmpty ? existing.email : updatedUser.email,
-            passwordHash: updatedUser.passwordHash.isEmpty
-            ? existing.passwordHash
-            : updatedUser.passwordHash,
+            passwordHash: existing.passwordHash,
             phoneNumber: updatedUser.phoneNumber.isEmpty
             ? existing.phoneNumber
             : updatedUser.phoneNumber
         )
-        
-        guard merged != existing else {
+    
+        if merged == existing {
            throw UserManagerError.noChangeDetected
         }
         
@@ -40,10 +38,17 @@ final class UserManager: UserService {
 }
 
 extension UserManager {
-    
+
     enum UserManagerError: LocalizedError {
-        
+
         case userNotFound
         case noChangeDetected
+
+        var errorDescription: String? {
+            switch self {
+            case .userNotFound: return "Unable to update the details"
+            case .noChangeDetected: return "No change in the data."
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ protocol AccountService {
 extension AccountService {
     
     func verifyPin(pinHash: String, pin: String) throws {
-        if !SecretHasher.verify(pinHash, against: pin) {
+        if !SecretHasher.verify(pin, against: pinHash) {
             throw AccountError.incorrectPin
         }
     }

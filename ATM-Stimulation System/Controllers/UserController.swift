@@ -75,18 +75,9 @@ final class UserController {
                 bankLocation: bankLocation,
                 pin: pin
             )
-
-            print(
-                """
-                \nAccount created successfully!
-                Account Number : \(account.maskedNumber())
-                Type           : \(accountType.rawValue)
-                Bank           : \(account.bankName)
-                Branch         : \(account.bankLocation)
-                Opened         : \(account.openedDate)
-                Current Balance: \(account.balance)
-                """
-            )
+            
+            print("\n Account Created Successfully.")
+            OutputUtils.displayAccountDetails(account: account, accountType: accountType.rawValue)
 
         } catch {
             print(error.localizedDescription)
@@ -96,7 +87,11 @@ final class UserController {
 
     private func deposit() {
         do {
-            let account = try selectAccount()
+            
+            guard let account = try selectAccount() else {
+                return
+            }
+            
             let amount = try readPositiveAmount("Enter amount to deposit")
             let pin = InputUtils.readString("Enter PIN")
 
@@ -107,7 +102,7 @@ final class UserController {
             )
 
             print(
-                "\nDeposit successful! New balance: ₹\(String(format: "%.2f", account.balance))"
+                "\nDeposit successful! New balance: \(account.balance))"
             )
         } catch {
             print("Deposit failed:", error.localizedDescription)
@@ -116,7 +111,10 @@ final class UserController {
 
     private func withdraw() {
         do {
-            let account = try selectAccount()
+            guard let account = try selectAccount() else {
+                return
+            }
+            
             let amount = try readPositiveAmount("Enter amount to withdraw")
             let pin = InputUtils.readString("Enter PIN")
 
@@ -127,7 +125,7 @@ final class UserController {
             )
 
             print(
-                "\nWithdrawal successful! New balance: ₹\(String(format: "%.2f", account.balance))"
+                "\nWithdrawal successful! New balance:\(account.balance))"
             )
         } catch {
             print("Withdrawal failed:", error.localizedDescription)
@@ -137,9 +135,13 @@ final class UserController {
     private func transfer() {
         do {
             print("\n---- Money Transfer ----------")
-
-            let source = try selectAccount()
-            let destination = try selectAccount()
+            print("Selects the accounts to transfer amount.")
+            
+            guard let source = try selectAccount(),
+                let destination = try selectAccount()
+            else {
+                return
+            }
 
             if source.accountNumber == destination.accountNumber {
                 print("Cannot transfer to the same account.")
@@ -159,8 +161,8 @@ final class UserController {
             print(
                 """
                 Transfer successful!
-                ₹\(String(format: "%.2f", amount)) transferred
-                New source balance: ₹\(String(format: "%.2f", source.balance))
+                \(amount) transferred
+                New source balance: \(source.balance))
                 """
             )
         } catch {
@@ -179,18 +181,7 @@ final class UserController {
         print("\n=== Your Accounts ===")
         for acc in accounts {
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
-            let last4 = String(acc.accountNumber.uuidString.suffix(4))
-
-            print(
-                """
-                • \(type) Account
-                  Bank:     \(acc.bankName)
-                  Branch:   \(acc.bankLocation)
-                  Number:   ••••\(last4)
-                  Balance:  ₹\(String(format: "%.2f", acc.balance))
-                  Opened:   \(acc.openedDate.formatted(date: .abbreviated, time: .omitted))
-                """
-            )
+            OutputUtils.displayAccountDetails(account: acc, accountType: type)
         }
     }
     
@@ -220,15 +211,15 @@ final class UserController {
         print("press ENTER if you want to keep the same details:")
 
         let name = InputUtils.readString(
-            "Enter Name(current Name \(user.name))",
+            "Enter Name(current name: \(user.name))",
             allowCancel: true
         )
         let email = InputUtils.readEmail(
-            "Enter Email(current Email \(user.email))",
+            "Enter Email(current email: \(user.email))",
             allowCancel: true
         )
         let phoneNumber = InputUtils.readPhoneNumber(
-            "Enter PhoneNumber(current phoneNumber \(user.phoneNumber))",
+            "Enter PhoneNumber(current phoneNumber: \(user.phoneNumber))",
             allowCancel: true
         )
 
@@ -254,7 +245,10 @@ final class UserController {
         print("\n=== Transaction History ===\n")
         
         do {
-            let account = try selectAccount()
+            
+            guard let account = try selectAccount() else {
+                return
+            }
             
             let history = accountCoordinator.getTransactionHistory(for: account.accountNumber)
             
@@ -296,10 +290,10 @@ extension UserController {
         return amount
     }
     
-    private func selectAccount() throws -> Account {
+    private func selectAccount() throws -> Account? {
         let accounts = accountCoordinator.getAccounts(for: userId)
         
-        if !accounts.isEmpty {
+        if accounts.isEmpty {
             throw AccountError.accountNotFound
         }
         
@@ -313,7 +307,7 @@ extension UserController {
         }
         
         guard let account = InputUtils.readMenuChoice(from: accounts, prompt: "Enter a choice (press Enter to move back)") else {
-            throw CancellationError()
+            return nil
         }
         
         return account

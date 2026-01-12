@@ -26,6 +26,11 @@ let userService: UserService = UserManager(
     userRepository: userRepository
 )
 
+DatabaseSeeder.seedDemoUserWithSavingsAccount(
+    userRepository: userRepository,
+    accountCoordinator: accountCoordinator
+)
+
 let appController = AppController(
     authenticationService: authenticationService,
     userService: userService,

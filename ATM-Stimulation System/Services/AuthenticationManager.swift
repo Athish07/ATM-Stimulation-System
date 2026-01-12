@@ -30,7 +30,7 @@ final class AuthenticationManager: AuthenticationService {
 
         }
         
-        if !SecretHasher.verify(user.passwordHash, against: password) {
+        if !SecretHasher.verify(password, against: user.passwordHash) {
             throw AuthenticationError.invalidPassword
         }
 
