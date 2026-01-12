@@ -1,6 +1,6 @@
 import Foundation
 
-class InMemoryUserRepository: UserRepository {
+final class InMemoryUserRepository: UserRepository {
 
     private var users: [UUID: User] = [:]
 
@@ -8,7 +8,7 @@ class InMemoryUserRepository: UserRepository {
         users[user.id] = user
     }
 
-    func findById(userId: UUID) -> User? {
+    func findById(_ userId: UUID) -> User? {
         users[userId]
     }
 

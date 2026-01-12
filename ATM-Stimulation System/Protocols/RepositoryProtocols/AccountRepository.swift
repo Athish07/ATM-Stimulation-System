@@ -1,7 +1,8 @@
 import Foundation
 
 protocol AccountRepository {
-    func save(account: Account)
-    func findById(userId: UUID) -> Account?
+    func save(_ account: Account)
+    func findByNumber(_ accountNumber: UUID) -> Account?
+    func findByUserId(_ userId: UUID) -> [Account]
     
 }

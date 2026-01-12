@@ -6,12 +6,11 @@ let transactionRepository: TransactionRepository =
 let authenticationService: AuthenticationService = AuthenticationManager(
     userRepository: userRepository
 )
-let transactionService: TransactionService = TransactionManager()
+
 let userService: UserService = UserManager()
 
 let appController = AppController(
     authenticationService: authenticationService,
-    transactionService: transactionService,
     userService: userService
 )
 appController.start()

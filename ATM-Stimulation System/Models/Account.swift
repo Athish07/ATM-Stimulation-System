@@ -1,5 +1,10 @@
 import Foundation
 
+enum AccountType: String, CaseIterable {
+    case current = "Current"
+    case savings = "Savings"
+}
+
 class Account {
 
     let accountNumber: UUID
@@ -8,6 +13,7 @@ class Account {
     let bankLocation: String
     let openedDate: Date
     let minimumBalance: Double
+    let pinHash: String
 
     private(set) var balance: Double = 0.0
 
@@ -16,6 +22,7 @@ class Account {
         userId: UUID,
         bankLocation: String,
         minimumBalance: Double,
+        pin: String
     ) {
         self.accountNumber = UUID()
         self.userId = userId
@@ -23,15 +30,10 @@ class Account {
         self.bankLocation = bankLocation
         self.openedDate = Date()
         self.minimumBalance = minimumBalance
+        self.pinHash = SecretHasher.hash(pin)
     }
     
-    func deposit(_ amount: Double) -> Bool {
-        guard amount > 0 else { return false }
-        balance += amount
-        return true
-    }
-    
-    func increaseBalance(_ amount: Double) {
+    func deposit(_ amount: Double) {
         balance += amount
     }
     
@@ -39,6 +41,9 @@ class Account {
         balance -= amount
     }
     
+    func maskedNumber() -> String {
+        let str = accountNumber.uuidString
+        return "XXXX-XXXX-XXXX-" + String(str.suffix(12))
+    }
     
 }
-

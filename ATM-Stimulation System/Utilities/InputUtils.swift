@@ -42,6 +42,21 @@ struct InputUtils {
             return input
         }
     }
+    
+    static func readDouble(_ prompt: String) -> Double {
+        
+        while true {
+
+            let input = read(prompt)
+            
+            if let number = Double(input) {
+                return number
+            }
+
+            print("Invalid Input, please Enter a valid number.")
+        }
+        
+    }
 
     static func readEmail(_ prompt: String, allowCancel: Bool = false) -> String {
 
@@ -134,7 +149,7 @@ struct InputUtils {
         while true {
             
             print(prompt, terminator: ": ")
-            guard let index = readInt(prompt, allowCancel: false) else {
+            guard let index = readInt(prompt, allowCancel: true) else {
                 return nil
             }
             

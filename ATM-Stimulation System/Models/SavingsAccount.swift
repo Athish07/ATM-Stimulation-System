@@ -1,6 +1,6 @@
 import Foundation
 
-class SaveingsAccount: Account {
+class SavingsAccount: Account {
 
     private(set) var interestRate: Double
 
@@ -8,7 +8,8 @@ class SaveingsAccount: Account {
         bankName: String,
         userId: UUID,
         bankLocation: String,
-        minimumBalance: Double = 1000,
+        minimumBalance: Double,
+        pin: String,
         interestRate: Double
     ) {
         self.interestRate = interestRate
@@ -16,7 +17,8 @@ class SaveingsAccount: Account {
             bankName: bankName,
             userId: userId,
             bankLocation: bankLocation,
-            minimumBalance: minimumBalance
+            minimumBalance: minimumBalance,
+            pin: pin
         )
     }
     

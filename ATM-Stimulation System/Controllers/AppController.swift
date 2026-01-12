@@ -3,16 +3,13 @@ import Foundation
 class AppController {
 
     private let authenticationService: AuthenticationService
-    private let transactionService: TransactionService
     private let userService: UserService
 
     init(
         authenticationService: AuthenticationService,
-        transactionService: TransactionService,
         userService: UserService
     ) {
         self.authenticationService = authenticationService
-        self.transactionService = transactionService
         self.userService = userService
     }
 

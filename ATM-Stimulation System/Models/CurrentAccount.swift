@@ -8,7 +8,8 @@ class CurrentAccount: Account {
         bankName: String,
         userId: UUID,
         bankLocation: String,
-        minimumBalance: Double = 5000,
+        minimumBalance: Double,
+        pin: String,
         overDraftLimit: Double?
     ) {
         self.overDraftLimit = overDraftLimit
@@ -16,7 +17,8 @@ class CurrentAccount: Account {
             bankName: bankName,
             userId: userId,
             bankLocation: bankLocation,
-            minimumBalance: minimumBalance
+            minimumBalance: minimumBalance,
+            pin: pin
         )
     }
 

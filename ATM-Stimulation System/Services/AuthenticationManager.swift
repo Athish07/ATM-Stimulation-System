@@ -30,10 +30,10 @@ final class AuthenticationManager: AuthenticationService {
 
         }
         
-        guard user.password == password else {
+        if !SecretHasher.verify(user.passwordHash, against: password) {
             throw AuthenticationError.invalidPassword
         }
-        
+
         return user
     }
     
@@ -47,7 +47,6 @@ final class AuthenticationManager: AuthenticationService {
         if userRepository.findByEmail(email) != nil {
             throw AuthenticationError.userAlreadyExists
         }
-        
         let user = User(
             name: name,
             email: email,
