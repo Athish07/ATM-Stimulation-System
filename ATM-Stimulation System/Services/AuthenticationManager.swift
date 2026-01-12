@@ -43,10 +43,13 @@ final class AuthenticationManager: AuthenticationService {
         password: String,
         phoneNumber: String
     ) throws {
-        
-        if userRepository.findByEmail(email) != nil {
+
+        if userRepository.findByEmail(email) != nil ||
+            userRepository.findByPhoneNumber(phoneNumber) != nil
+        {
             throw AuthenticationError.userAlreadyExists
         }
+        
         let user = User(
             name: name,
             email: email,

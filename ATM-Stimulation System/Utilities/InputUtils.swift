@@ -6,8 +6,8 @@ struct InputUtils {
         
         print(prompt, terminator: ": ")
         let input = readLine()
-
         return input?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
     }
 
     static func readInt(_ prompt: String, allowCancel: Bool = false) -> Int? {
@@ -98,7 +98,7 @@ struct InputUtils {
               }
                     
               if !phoneTest.evaluate(with: phoneNumber) {
-                  print("Invalid PhoneNumber formate. Example formate (000-000-0000)")
+                  print("Invalid PhoneNumber")
                   continue
               }
               
@@ -108,42 +108,52 @@ struct InputUtils {
       }
     
 
-    static func readPassword(_ prompt: String, allowCancel: Bool = false) -> String {
+    static func readPassword(
+        _ prompt: String,
+        allowCancel: Bool = false
+    ) -> String {
 
         while true {
 
             let password = read(prompt)
 
-            let passwordRegx =
-                "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&<>*~:`-]).{8,}$"
-            let passwordCheck = NSPredicate(
-                format: "SELF MATCHES %@",
-                passwordRegx
-            )
-
-            if (password.isEmpty && allowCancel) {
+            if password.isEmpty && allowCancel {
                 return password
             }
-            
-            if !passwordCheck.evaluate(with: password)
-            {
-                print(
-                    """
-                    
-                    least one uppercase
-                    least one digit
-                    least one lowercase
-                    least one symbol
-                    min 8 characters total
-                    
-                    """
-                )
-                continue
+
+            var errors: [String] = []
+
+            if password.count < 8 {
+                errors.append("• Minimum 8 characters required")
             }
-            
-            return password
+
+            if password.range(of: "[A-Z]", options: .regularExpression) == nil {
+                errors.append("• At least one uppercase letter required")
+            }
+
+            if password.range(of: "[a-z]", options: .regularExpression) == nil {
+                errors.append("• At least one lowercase letter required")
+            }
+
+            if password.range(of: "[0-9]", options: .regularExpression) == nil {
+                errors.append("• At least one digit required")
+            }
+
+            if password.range(
+                of: "[#?!@$%^&<>*~:`-]",
+                options: .regularExpression
+            ) == nil {
+                errors.append("• At least one special character required")
+            }
+
+            if errors.isEmpty {
+                return password
+            }
+
+            print("\nPassword requirements not met:")
+            errors.forEach { print($0) }
+            print()
         }
-        
     }
     
     static func readMenuChoice<T>(
@@ -151,7 +161,7 @@ struct InputUtils {
         prompt: String = "Enter a choice"
     ) -> T? {
         
-        guard !options.isEmpty else {
+        if options.isEmpty {
             return nil
         }
         

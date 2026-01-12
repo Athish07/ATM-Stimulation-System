@@ -1,3 +1,5 @@
+import Foundation
+
 struct OutputUtils {
     
     static func showMenu<T: RawRepresentable>(
@@ -9,7 +11,7 @@ struct OutputUtils {
         
         for (index,option) in options.enumerated() {
             
-            print("\(index + 1). \(option)")
+            print("\(index + 1). \(option.rawValue)")
         }
     }
     
@@ -21,8 +23,9 @@ struct OutputUtils {
             Type           : \(accountType)
             Bank           : \(account.bankName)
             Branch         : \(account.bankLocation)
-            Opened         : \(account.openedDate.formatted)
+            Opened         : \(account.openedDate.formatted())
             Current Balance: \(account.balance)
+            ------------------------------------------------------------\n
             """
         )
     }

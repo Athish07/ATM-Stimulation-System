@@ -56,7 +56,7 @@ final class UserController {
             options: AccountType.allCases,
             title: "Select Account Type"
         )
-        
+
         guard
             let accountType = InputUtils.readMenuChoice(
                 from: AccountType.allCases
@@ -78,7 +78,7 @@ final class UserController {
                 pin: pin
             )
 
-            print("\n Account Created Successfully.")
+            print("\nAccount Created Successfully.")
             OutputUtils.displayAccountDetails(
                 account: account,
                 accountType: accountType.rawValue
@@ -92,11 +92,11 @@ final class UserController {
 
     private func deposit() {
         do {
-            
+
             guard let account = try selectAccount() else {
                 return
             }
-            
+
             let amount = readPositiveAmount("Enter amount to deposit")
             let pin = InputUtils.readString("Enter PIN")
 
@@ -107,8 +107,9 @@ final class UserController {
             )
 
             print(
-                "\nDeposit successful! New balance: \(account.balance))"
+                "\nDeposit successful! New balance: \(account.balance)"
             )
+
         } catch {
             print("Deposit failed:", error.localizedDescription)
         }
@@ -119,7 +120,7 @@ final class UserController {
             guard let account = try selectAccount() else {
                 return
             }
-            
+
             let amount = readPositiveAmount("Enter amount to withdraw")
             let pin = InputUtils.readString("Enter PIN")
 
@@ -130,24 +131,27 @@ final class UserController {
             )
 
             print(
-                "\nWithdrawal successful! New balance:\(account.balance))"
+                "\nWithdrawal successful! New balance:\(account.balance)"
             )
         } catch {
             print("Withdrawal failed:", error.localizedDescription)
         }
     }
-    
+
     private func transfer() {
         do {
-            print("\n---- Money Transfer ----------")
-            print("Select the accounts to transfer amount.")
+            print("\n---- Money Transfer ----------\n")
             
-            guard let source = try selectAccount(),
-                let destination = try selectAccount()
-            else {
+            print("====Select Source Account====")
+            guard let source = try selectAccount() else {
                 return
             }
-
+            
+            print("\n====Select Destination Account====")
+            guard let destination = try selectAccount() else {
+                return
+            }
+            
             if source.accountNumber == destination.accountNumber {
                 print("Cannot transfer to the same account.")
                 return
@@ -167,14 +171,14 @@ final class UserController {
                 """
                 Transfer successful!
                 \(amount) transferred
-                New source balance: \(source.balance))
+                New source balance: \(source.balance)
                 """
             )
         } catch {
             print("Transfer failed:", error.localizedDescription)
         }
     }
-    
+
     private func viewAccounts() {
         let accounts = accountCoordinator.getAccounts(for: userId)
 
@@ -192,25 +196,25 @@ final class UserController {
             )
         }
     }
-    
+
     private func viewProfile() {
-        
+
         guard let user = userService.getUserById(userId) else {
             print("Unable to load the details...")
             return
         }
-        
-        print (
+
+        print(
             """
-            Name: \(user.name)
+            \nName: \(user.name)
             Email: \(user.email)
             PhnoneNumber: \(user.phoneNumber)
             """
         )
     }
-    
+
     private func updateProfile() {
-        
+
         guard let user = userService.getUserById(userId) else {
             print("User not found")
             return
@@ -248,28 +252,30 @@ final class UserController {
         }
 
     }
-    
+
     private func transactionHistory() {
         print("\n=== Transaction History ===\n")
-        
+
         do {
-            
+
             guard let account = try selectAccount() else {
                 return
             }
-            
-            let history = accountCoordinator.getTransactionHistory(for: account.accountNumber)
-            
+
+            let history = accountCoordinator.getTransactionHistory(
+                for: account.accountNumber
+            )
+
             if history.isEmpty {
                 print("\nNo transactions yet.\n")
                 return
             }
             print("\n=== Transaction History ===\n")
-            
+
             for (index, transaction) in history.enumerated() {
                 print("\(index + 1). \(transaction.description())")
             }
-            
+
         } catch {
             print(error.localizedDescription)
         }
@@ -282,20 +288,24 @@ extension UserController {
         while true {
 
             let pin = InputUtils.readString("Enter PIN (4-6 digits)")
+
+            if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
+                continue
+            }
+
             let confirm = InputUtils.readString("Confirm PIN")
 
-            if pin == confirm, pin.count >= 4, pin.count <= 6,
-                pin.allSatisfy(\.isNumber)
-            {
+            if pin == confirm {
                 return pin
             }
+
             print("PINs do not match or invalid format. Try again.")
-            
+
         }
     }
-    
+
     private func readPositiveAmount(_ prompt: String) -> Double {
-        
+
         while true {
             let amount = InputUtils.readDouble(prompt)
             if amount < 0 {
@@ -304,33 +314,37 @@ extension UserController {
             }
             return amount
         }
-        
+
     }
-    
+
     private func selectAccount() throws -> Account? {
         let accounts = accountCoordinator.getAccounts(for: userId)
-        
+
         if accounts.isEmpty {
             throw AccountError.accountNotFound
         }
-        
+
         print("\nYour accounts:")
         for (index, acc) in accounts.enumerated() {
-            let last4 = String(acc.accountNumber.uuidString.suffix(4))
+            let last4 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
             print(
-                "\(index + 1). \(acc.bankName)XXX-XXX-\(last4) (\(type))"
+                "\(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last4) (\(type))"
             )
         }
-        
-        guard let account = InputUtils.readMenuChoice(from: accounts, prompt: "Enter a choice (press Enter to move back)") else {
+
+        guard
+            let account = InputUtils.readMenuChoice(
+                from: accounts,
+                prompt: "Enter a choice (press Enter to move back)"
+            )
+        else {
             return nil
         }
-        
+
         return account
-        
+
     }
-    
 }
 
 enum UserMenu: String, CaseIterable {

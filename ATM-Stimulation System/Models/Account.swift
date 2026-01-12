@@ -38,7 +38,7 @@ class Account {
     
     func maskedNumber() -> String {
         let str = accountNumber.uuidString
-        return "XXXX-XXXX-XXXX-" + String(str.suffix(12))
+        return String(str.suffix(12))
     }
 }
 

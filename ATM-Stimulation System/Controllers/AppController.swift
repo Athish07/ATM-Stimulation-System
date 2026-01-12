@@ -1,11 +1,11 @@
 import Foundation
 
 class AppController {
-
+    
     private let authenticationService: AuthenticationService
     private let userService: UserService
     private let accountCoordinator: AccountCoordinator
-
+    
     init(
         authenticationService: AuthenticationService,
         userService: UserService,
@@ -15,45 +15,45 @@ class AppController {
         self.userService = userService
         self.accountCoordinator = accountCoordinator
     }
-
+    
     func start() {
-
+        
         while true {
-
-            OutputUtils.showMenu(options: MainMenu.allCases, title: "MainMmenu")
+            
+            OutputUtils.showMenu(options: MainMenu.allCases, title: "MainMenu")
             guard
                 let choice = InputUtils.readMenuChoice(from: MainMenu.allCases)
             else {
                 print("Invalid choice, try again.")
                 continue
             }
-
+            
             switch choice {
-
+                
             case .login: login()
             case .register: register()
             case .exit:
                 print("Thanks for using the application ")
                 exit(0)
             }
-
+            
         }
     }
-
+    
     private func login() {
-
+        
         OutputUtils.showMenu(
             options: LoginType.allCases,
             title: "Login Options"
         )
-
+        
         guard let choice = InputUtils.readMenuChoice(from: LoginType.allCases)
         else {
             return
         }
-
+        
         let identifier: String
-
+        
         switch choice {
         case .email:
             identifier = InputUtils.readString("Enter email")
@@ -61,45 +61,51 @@ class AppController {
             identifier = InputUtils.readString("Enter phoneNumber")
         }
         let password = InputUtils.readString("Enter password")
-
+        
         do {
-
+            
             let user = try authenticationService.login(
                 type: choice,
                 identifier: identifier,
                 password: password
             )
+            
             print("\nUser login successful, welocome \(user.name)")
             UserController(
                 userId: user.id,
                 userService: userService,
                 accountCoordinator: accountCoordinator
             ).start()
-
+            
         } catch {
             print(error.localizedDescription)
         }
-        
     }
-
+    
     private func register() {
-
+        
         print("=== Register New User ===")
-
+        
         let name = InputUtils.readString("Enter full name")
         let email = InputUtils.readEmail("Enter email")
         let password = InputUtils.readPassword("Enter password")
-        let confirm = InputUtils.readPassword("Confirm password")
-
-        if password != confirm {
-            print("Passwords dosen't match.")
-            return
+        
+        while true {
+            
+            let confirm = InputUtils.readString("Confirm password")
+            
+            if password != confirm {
+                print("Passwords dosen't match.")
+                continue
+            }
+            break
+            
         }
         
         let phoneNumber = InputUtils.readPhoneNumber("Enter phone number")
-
+        
         do {
-
+            
             try authenticationService.register(
                 name: name,
                 email: email,
@@ -111,7 +117,6 @@ class AppController {
             print(error.localizedDescription)
         }
     }
-    
 }
 
 extension AppController {
