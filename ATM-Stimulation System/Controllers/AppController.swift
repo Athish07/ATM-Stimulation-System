@@ -22,7 +22,7 @@ class AppController {
             
             OutputUtils.showMenu(options: MainMenu.allCases, title: "MainMenu")
             guard
-                let choice = InputUtils.readMenuChoice(from: MainMenu.allCases)
+                let choice = InputUtils.readMenuChoice(from: MainMenu.allCases,prompt: "Enter a choice")
             else {
                 print("Invalid choice, try again.")
                 continue
@@ -120,7 +120,7 @@ class AppController {
 }
 
 extension AppController {
-
+    
     enum MainMenu: String, CaseIterable {
         case login = "Login"
         case register = "Registration"

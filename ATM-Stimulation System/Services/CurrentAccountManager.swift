@@ -6,14 +6,8 @@ final class CurrentAccountManager: AccountService {
     private let minimumBalance: Double = 5000
     private let overDraftLimit: Double = 5000
     
-    let supportedAccountType: AccountType = .current
-
     init(repository: AccountRepository) {
         self.repository = repository
-    }
-
-    func owns(accountNumber: UUID) -> Bool {
-        repository.findByNumber(accountNumber) is CurrentAccount
     }
     
     func createAccount(
@@ -47,7 +41,7 @@ final class CurrentAccountManager: AccountService {
         }
         
         guard
-            let account = repository.findByNumber(accountNumber)
+            let account = repository.findByAccountNumber(accountNumber)
                 as? CurrentAccount
         else {
             throw AccountError.accountNotFound
@@ -70,7 +64,7 @@ final class CurrentAccountManager: AccountService {
         }
 
         guard
-            let account = repository.findByNumber(accountNumber)
+            let account = repository.findByAccountNumber(accountNumber)
                 as? CurrentAccount
         else {
             throw AccountError.accountNotFound
@@ -85,3 +79,4 @@ final class CurrentAccountManager: AccountService {
         repository.save(account)
     }
 }
+

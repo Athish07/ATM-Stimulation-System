@@ -20,9 +20,7 @@ protocol AccountService {
         pin: String,
         amount: Double
     ) throws
-
-    func owns(accountNumber: UUID) -> Bool
-    var supportedAccountType: AccountType { get }
+    
 }
 
 extension AccountService {

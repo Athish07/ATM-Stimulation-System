@@ -1,7 +1,7 @@
 import Foundation
 
 class Account {
-
+    
     let accountNumber: UUID
     let userId: UUID
     let bankName: String
@@ -9,9 +9,9 @@ class Account {
     let openedDate: Date
     let minimumBalance: Double
     let pinHash: String
-
+    
     private(set) var balance: Double = 0.0
-
+    
     init(
         bankName: String,
         userId: UUID,
@@ -45,5 +45,5 @@ class Account {
 public enum AccountType: String, CaseIterable {
     case current = "Current"
     case savings = "Savings"
+    
 }
-

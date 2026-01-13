@@ -1,11 +1,11 @@
 import Foundation
 
 final class UserController {
-
+    
     private let userId: UUID
     private let userService: UserService
     private let accountCoordinator: AccountCoordinator
-
+    
     init(
         userId: UUID,
         userService: UserService,
@@ -15,7 +15,7 @@ final class UserController {
         self.userService = userService
         self.accountCoordinator = accountCoordinator
     }
-
+    
     func start() {
 
         while true {
@@ -357,5 +357,5 @@ enum UserMenu: String, CaseIterable {
     case transfer = "Transfer Money"
     case transactionHistory = "View Transaction History"
     case logout = "Logout"
-
+    
 }

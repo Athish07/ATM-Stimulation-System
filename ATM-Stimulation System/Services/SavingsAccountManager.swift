@@ -6,16 +6,10 @@ final class SavingsAccountManager: AccountService {
     private let interestRate: Double = 0.85
     private let minimumBalance: Double = 1000
     
-    let supportedAccountType: AccountType = .savings
-
     init(repository: AccountRepository) {
         self.repository = repository
     }
-
-    func owns(accountNumber: UUID) -> Bool {
-        repository.findByNumber(accountNumber) is SavingsAccount
-    }
-
+    
     func createAccount(
         bankName: String,
         userId: UUID,
@@ -47,7 +41,7 @@ final class SavingsAccountManager: AccountService {
         }
 
         guard
-            let account = repository.findByNumber(accountNumber)
+            let account = repository.findByAccountNumber(accountNumber)
                 as? SavingsAccount
         else {
             throw AccountError.accountNotFound
@@ -70,7 +64,7 @@ final class SavingsAccountManager: AccountService {
         }
         
         guard
-            let account = repository.findByNumber(accountNumber)
+            let account = repository.findByAccountNumber(accountNumber)
                 as? SavingsAccount
         else {
             throw AccountError.accountNotFound

@@ -8,7 +8,7 @@ final class InMemoryAccountRepository: AccountRepository {
         accounts[account.accountNumber] = account
     }
 
-    func findByNumber(_ accountNumber: UUID) -> Account? {
+    func findByAccountNumber(_ accountNumber: UUID) -> Account? {
         accounts[accountNumber]
     }
 
