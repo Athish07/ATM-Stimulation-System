@@ -3,11 +3,17 @@ import Foundation
 final class SavingsAccountManager: AccountService {
 
     private let repository: AccountRepository
+    private let transactionRepository: TransactionRepository
     private let interestRate: Double = 0.85
     private let minimumBalance: Double = 1000
     
-    init(repository: AccountRepository) {
+    private let perDayLimit: Double = 10
+    private let perMonthLimit: Double = 10
+    private let perYearLimit: Double = 10
+    
+    init(repository: AccountRepository, transactionRepository: TransactionRepository) {
         self.repository = repository
+        self.transactionRepository = transactionRepository
     }
     
     func createAccount(
@@ -35,11 +41,11 @@ final class SavingsAccountManager: AccountService {
         pin: String,
         amount: Double
     ) throws {
-
+        
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-
+        
         guard
             let account = repository.findByAccountNumber(accountNumber)
                 as? SavingsAccount
@@ -48,7 +54,7 @@ final class SavingsAccountManager: AccountService {
         }
 
         try verifyPin(pinHash: account.pinHash, pin: pin)
-
+        
         account.deposit(amount)
         repository.save(account)
     }
@@ -71,6 +77,7 @@ final class SavingsAccountManager: AccountService {
         }
 
         try verifyPin(pinHash: account.pinHash, pin: pin)
+        try validateTransactionLimit(accountNumber: accountNumber, amount: amount)
 
         guard account.withdraw(amount) else {
             throw AccountError.insufficientBalance
@@ -80,4 +87,84 @@ final class SavingsAccountManager: AccountService {
         
     }
     
+}
+
+extension SavingsAccountManager {
+    
+    private func validateTransactionLimit(accountNumber: UUID, amount: Double) throws {
+        
+        let history = accountCoordinator.getTransactionHistory(
+            for: accountNumber
+        )
+        
+        if amount > perDayLimit {
+            throw TransactionLimitError.perDayLimitExceed
+        }
+        
+        if history.isEmpty { return }
+        
+        let calendar = Calendar.current
+        
+        let todayStart = calendar.startOfDay(for: Date())
+        let monthAsInt = calendar.component(.month, from: todayStart)
+        let yearAsInt = calendar.component(.year, from: todayStart)
+        
+        guard let tomorrowStart = calendar.date(byAdding: .day, value: 1, to: todayStart) else {
+            fatalError("Could not calculate tomorrow's date")
+        }
+        
+        let perDayHistory = history.filter { history in
+            return history.date >= todayStart && history.date < tomorrowStart
+        }
+        
+        let perMonthHistory = history.filter { history in
+            return calendar.component(.month, from: history.date) == monthAsInt
+        }
+        
+        let perYearHistory = history.filter { history in
+            return calendar.component(.year, from: history.date) == yearAsInt
+        }
+        
+        var perDaySum: Double = 0
+        var perMonthSum: Double = 0
+        var perYearSum: Double = 0
+        
+        sumAmount(amountSum: &perDaySum, transactionHistory: perDayHistory)
+        sumAmount(amountSum: &perMonthSum, transactionHistory: perMonthHistory)
+        sumAmount(amountSum: &perYearSum, transactionHistory: perYearHistory)
+        
+        if perDaySum > perDayLimit {
+            throw TransactionLimitError.perDayLimitExceed
+        }
+        
+        if perMonthSum > perMonthLimit {
+            throw TransactionLimitError.perMonthLimitExceed
+        }
+        
+        if perYearSum > perYearLimit {
+            throw TransactionLimitError.perYearLimitExceed
+        }
+        
+    }
+    
+    private func sumAmount(amountSum: inout Double, transactionHistory: [Transaction]) {
+        
+        for history in transactionHistory { amountSum += history.amount }
+    }
+}
+
+enum TransactionLimitError: LocalizedError {
+    case perDayLimitExceed
+    case perMonthLimitExceed
+    case perYearLimitExceed
+    
+    var errorDescription: String? {
+        
+        switch self {
+        case .perDayLimitExceed: return "Cannot proceed with the transaction amount is more than per day limit."
+        case .perMonthLimitExceed: return "Cannot proceed with the transaction amount is more than per month limit."
+        case .perYearLimitExceed: return "Cannot proceed with the transaction amount is more than per year limit."
+        }
+        
+    }
 }

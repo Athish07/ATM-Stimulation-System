@@ -5,7 +5,7 @@ final class UserController {
     private let userId: UUID
     private let userService: UserService
     private let accountCoordinator: AccountCoordinator
-    
+
     init(
         userId: UUID,
         userService: UserService,
@@ -37,6 +37,7 @@ final class UserController {
             case .viewProfile: viewProfile()
             case .updateProfile: updateProfile()
             case .transactionHistory: transactionHistory()
+            case .transactionHistoryByMonthAndYear: transactionHistoryByMonthAndYear()
             case .logout:
                 print("Thanks for useing the application.")
                 return
@@ -50,12 +51,12 @@ final class UserController {
 
         let bankName = InputUtils.readString("Enter bank name")
         let bankLocation = InputUtils.readString("Enter branch/location")
-
+        
         OutputUtils.showMenu(
             options: AccountType.allCases,
             title: "Select Account Type"
         )
-
+        
         guard
             let accountType = InputUtils.readMenuChoice(
                 from: AccountType.allCases
@@ -66,9 +67,9 @@ final class UserController {
         }
 
         let pin = readAndValidatePin()
-
+        
         do {
-
+            
             let account = try accountCoordinator.createAccount(
                 bankName: bankName,
                 userId: userId,
@@ -76,19 +77,19 @@ final class UserController {
                 bankLocation: bankLocation,
                 pin: pin
             )
-
+            
             print("\nAccount Created Successfully.")
             OutputUtils.displayAccountDetails(
                 account: account,
                 accountType: accountType.rawValue
             )
-
+            
         } catch {
             print(error.localizedDescription)
         }
-
+        
     }
-
+    
     private func deposit() {
         do {
 
@@ -113,7 +114,7 @@ final class UserController {
             print("Deposit failed:", error.localizedDescription)
         }
     }
-
+    
     private func withdraw() {
         do {
             
@@ -137,7 +138,7 @@ final class UserController {
             print("Withdrawal failed:", error.localizedDescription)
         }
     }
-
+    
     private func transfer() {
         do {
             print("\n---- Money Transfer ----------\n")
@@ -177,6 +178,7 @@ final class UserController {
         } catch {
             print("Transfer failed:", error.localizedDescription)
         }
+        
     }
 
     private func viewAccounts() {
@@ -196,9 +198,9 @@ final class UserController {
             )
         }
     }
-
+    
     private func viewProfile() {
-
+        
         guard let user = userService.getUserById(userId) else {
             print("Unable to load the details...")
             return
@@ -211,6 +213,7 @@ final class UserController {
             PhnoneNumber: \(user.phoneNumber)
             """
         )
+        
     }
 
     private func updateProfile() {
@@ -269,9 +272,56 @@ final class UserController {
                 print("\nNo transactions yet.\n")
                 return
             }
+        
             print("\n=== Transaction History ===\n")
 
             for (index, transaction) in history.enumerated() {
+                print("\(index + 1). \(transaction.description())")
+            }
+
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    private func transactionHistoryByMonthAndYear() {
+        
+        do {
+
+            guard let account = try selectAccount() else {
+                return
+            }
+            
+            let history = accountCoordinator.getTransactionHistory(
+                for: account.accountNumber
+            )
+
+            if history.isEmpty {
+                print("\nNo transactions yet.\n")
+                return
+            }
+            
+            let month = InputUtils.readString("Enter the month")
+            let year = InputUtils.readInt("Enter the year")
+            
+            let dateFormatter = DateFormatter()
+             dateFormatter.locale = Locale.current
+             dateFormatter.dateFormat = "MMMM"
+            
+            let newHistory = history.filter { history in
+                let historyMonthName = dateFormatter.string(from: history.date)
+                return historyMonthName.lowercased() == month.lowercased() && Calendar.current.component(.year, from: history.date) == year
+                
+            }
+            
+            if newHistory.isEmpty {
+                print("\n No transaction history for that month and year.")
+                return
+            }
+        
+            print("\n=== Transaction History Filter By Month and Year ===\n")
+
+            for (index, transaction) in newHistory.enumerated() {
                 print("\(index + 1). \(transaction.description())")
             }
 
@@ -355,6 +405,7 @@ enum UserMenu: String, CaseIterable {
     case withdraw = "Withdraw Money"
     case transfer = "Transfer Money"
     case transactionHistory = "View Transaction History"
+    case transactionHistoryByMonthAndYear = "Filter the transaction history based on month and year"
     case logout = "Logout"
     
 }

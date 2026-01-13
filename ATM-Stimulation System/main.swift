@@ -7,7 +7,10 @@ let authenticationService: AuthenticationService = AuthenticationManager(
     userRepository: userRepository
 )
 let savingsAccountService =
-    SavingsAccountManager(repository: accountRepository)
+    SavingsAccountManager(
+        repository: accountRepository,
+        transactionRepository: transactionRepository
+    )
 
 let currentAccountService =
     CurrentAccountManager(repository: accountRepository)
