@@ -44,21 +44,22 @@ struct InputUtils {
     }
     
     static func readDouble(_ prompt: String) -> Double {
-        
+
         while true {
 
             let input = read(prompt)
-            
+
             if let number = Double(input) {
                 return number
             }
 
             print("Invalid Input, please Enter a valid number.")
         }
-        
+
     }
 
-    static func readEmail(_ prompt: String, allowCancel: Bool = false) -> String {
+    static func readEmail(_ prompt: String, allowCancel: Bool = false) -> String
+    {
 
         while true {
 
@@ -74,39 +75,40 @@ struct InputUtils {
             if (email.isEmpty && allowCancel) {
                 return email
             }
-            
+
             if !emailPredicate.evaluate(with: email) {
                 print("Enter a valid email.")
                 continue
             }
-            
+
             return email
         }
     }
-    
-    static func readPhoneNumber(_ prompt: String, allowCancel: Bool = false) -> String {
-          
-          while true {
-              
-              let phoneNumber = read(prompt)
-              
-              let PHONE_REGEX = "^\\d{10}$"
-              let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
-              
-              if (phoneNumber.isEmpty && allowCancel) {
-                  return phoneNumber
-              }
-                    
-              if !phoneTest.evaluate(with: phoneNumber) {
-                  print("Invalid Phone Number")
-                  continue
-              }
-              
-              return phoneNumber
-              
-          }
-      }
-    
+
+    static func readPhoneNumber(_ prompt: String, allowCancel: Bool = false)
+        -> String
+    {
+
+        while true {
+
+            let phoneNumber = read(prompt)
+
+            let PHONE_REGEX = "^\\d{10}$"
+            let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
+
+            if (phoneNumber.isEmpty && allowCancel) {
+                return phoneNumber
+            }
+
+            if !phoneTest.evaluate(with: phoneNumber) {
+                print("Invalid Phone Number")
+                continue
+            }
+
+            return phoneNumber
+
+        }
+    }
 
     static func readPassword(
         _ prompt: String,
@@ -154,29 +156,79 @@ struct InputUtils {
             errors.forEach { print($0) }
         }
     }
-    
+
     static func readMenuChoice<T>(
         from options: [T],
         prompt: String = "Enter a choice"
     ) -> T? {
-        
+
         if options.isEmpty {
             return nil
         }
-        
+
         while true {
-            
+
             guard let index = readInt(prompt, allowCancel: true) else {
                 return nil
             }
-            
+
             if (1...options.count).contains(index) {
                 return options[index - 1]
             }
-            
+
             print("Invalid choice, please try again.")
         }
-        
+
     }
-    
+
+    static func readAndVerifyPin(pinHash: String) {
+
+        while true {
+
+            let pin = InputUtils.readString("Enter the pin")
+
+            if pin.isEmpty { return }
+
+            if !SecretHasher.verify(pin, against: pinHash) {
+                print("Invalid input, please try again.")
+                continue
+            }
+            return
+        }
+    }
+
+    static func readAndValidatePin() -> String {
+        while true {
+
+            let pin = InputUtils.readString("Enter PIN (4-6 digits)")
+
+            if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
+                print("Invalid input, please try again.")
+                continue
+            }
+
+            let confirm = InputUtils.readString("Confirm PIN")
+
+            if pin == confirm {
+                return pin
+            }
+
+            print("PINs do not match or invalid format. Try again.")
+
+        }
+    }
+
+    static func readPositiveAmount(_ prompt: String) -> Double {
+
+        while true {
+            let amount = InputUtils.readDouble(prompt)
+            if amount < 0 {
+                print("Amount cannot be a negative value, try again.")
+                continue
+            }
+            return amount
+        }
+
+    }
+
 }

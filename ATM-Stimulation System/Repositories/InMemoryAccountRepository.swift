@@ -16,4 +16,8 @@ final class InMemoryAccountRepository: AccountRepository {
         accounts.values.filter { $0.userId == userId }
     }
     
+    func getAllAccounts() -> [Account] {
+        Array(accounts.values)
+    }
+    
 }

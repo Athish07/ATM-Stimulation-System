@@ -66,7 +66,7 @@ final class UserController {
             return
         }
 
-        let pin = readAndValidatePin()
+        let pin = InputUtils.readAndValidatePin()
         
         do {
             
@@ -93,18 +93,15 @@ final class UserController {
     private func deposit() {
         do {
 
-            guard let account = try selectAccount() else {
+            guard let account = try selectUserAccount() else {
                 return
             }
             
-            let amount = readPositiveAmount("Enter amount to deposit")
-            let pin = InputUtils.readString("Enter PIN")
-
-            try verifyPin(pinHash: account.pinHash, pin: pin)
-
+            let amount = InputUtils.readPositiveAmount("Enter amount to deposit")
+            InputUtils.readAndVerifyPin(pinHash: account.pinHash)
+            
             try accountCoordinator.deposit(
                 to: account.accountNumber,
-                pin: pin,
                 amount: amount
             )
 
@@ -120,18 +117,15 @@ final class UserController {
     private func withdraw() {
         do {
             
-            guard let account = try selectAccount() else {
+            guard let account = try selectUserAccount() else {
                 return
             }
             
-            let amount = readPositiveAmount("Enter amount to withdraw")
-            let pin = InputUtils.readString("Enter PIN")
-            
-            try verifyPin(pinHash: account.pinHash, pin: pin)
+            let amount = InputUtils.readPositiveAmount("Enter amount to withdraw")
+            InputUtils.readAndVerifyPin(pinHash: account.pinHash)
             
             try accountCoordinator.withdraw(
                 from: account.accountNumber,
-                pin: pin,
                 amount: amount
             )
             
@@ -145,15 +139,14 @@ final class UserController {
     
     private func transfer() {
         do {
+            
             print("\n---- Money Transfer ----------\n")
             
-            print("====Select Source Account====")
-            guard let source = try selectAccount() else {
+            guard let source = try selectUserAccount() else {
                 return
             }
             
-            print("\n====Select Destination Account====")
-            guard let destination = try selectAccount() else {
+            guard let destination = try selectTransferAccount() else {
                 return
             }
             
@@ -162,13 +155,12 @@ final class UserController {
                 return
             }
 
-            let amount = readPositiveAmount("Enter a amount to transfer")
-            let pin = InputUtils.readString("Enter PIN")
-
+            let amount = InputUtils.readPositiveAmount("Enter a amount to transfer")
+            InputUtils.readAndVerifyPin(pinHash: source.pinHash)
+            
             try accountCoordinator.transfer(
                 from: source.accountNumber,
                 to: destination.accountNumber,
-                pin: pin,
                 amount: amount
             )
 
@@ -186,7 +178,7 @@ final class UserController {
     }
 
     private func viewAccounts() {
-        let accounts = accountCoordinator.getAccounts(for: userId)
+        let accounts = accountCoordinator.getUserAccounts(for: userId)
 
         if accounts.isEmpty {
             print("\nYou don't have any bank accounts yet.\n")
@@ -264,7 +256,7 @@ final class UserController {
         
         do {
 
-            guard let account = try selectAccount() else {
+            guard let account = try selectUserAccount() else {
                 return
             }
 
@@ -292,7 +284,7 @@ final class UserController {
         
         do {
 
-            guard let account = try selectAccount() else {
+            guard let account = try selectUserAccount() else {
                 return
             }
             
@@ -314,8 +306,9 @@ final class UserController {
             
             let newHistory = history.filter { history in
                 let historyMonthName = dateFormatter.string(from: history.date)
-                return historyMonthName.lowercased() == month.lowercased() && Calendar.current.component(.year, from: history.date) == year
-                
+                return historyMonthName.lowercased() == month.lowercased()
+                    && Calendar.current.component(.year, from: history.date)
+                        == year
             }
             
             if newHistory.isEmpty {
@@ -328,7 +321,6 @@ final class UserController {
             for (index, transaction) in newHistory.enumerated() {
                 print("\(index + 1). \(transaction.description())")
             }
-
         } catch {
             print(error.localizedDescription)
         }
@@ -336,62 +328,23 @@ final class UserController {
 }
 
 extension UserController {
-
-    private func readAndValidatePin() -> String {
-        while true {
-
-            let pin = InputUtils.readString("Enter PIN (4-6 digits)")
-
-            if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
-                continue
-            }
-
-            let confirm = InputUtils.readString("Confirm PIN")
-
-            if pin == confirm {
-                return pin
-            }
-
-            print("PINs do not match or invalid format. Try again.")
-
-        }
-    }
     
-    private func verifyPin(pinHash: String, pin: String) throws {
-        if !SecretHasher.verify(pin, against: pinHash) {
-            throw AccountError.incorrectPin
-        }
-    }
-
-    private func readPositiveAmount(_ prompt: String) -> Double {
-
-        while true {
-            let amount = InputUtils.readDouble(prompt)
-            if amount < 0 {
-                print("Amount cannot be a negative value, try again.")
-                continue
-            }
-            return amount
-        }
-
-    }
-
-    private func selectAccount() throws -> Account? {
-        let accounts = accountCoordinator.getAccounts(for: userId)
+    private func selectUserAccount() throws -> Account? {
+        let accounts = accountCoordinator.getUserAccounts(for: userId)
         
         if accounts.isEmpty {
             throw AccountError.accountNotFound
         }
-
+        
         print("\nYour accounts:")
         for (index, acc) in accounts.enumerated() {
-            let last4 = String(acc.accountNumber.uuidString.suffix(5))
+            let last5 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
             print(
-                "\(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last4) (\(type))"
+                "\(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last5) (\(type))"
             )
         }
-
+        
         guard
             let account = InputUtils.readMenuChoice(
                 from: accounts,
@@ -400,10 +353,53 @@ extension UserController {
         else {
             return nil
         }
-
+        
         return account
-
+        
     }
+    
+    private func selectTransferAccount() throws
+    -> Account?
+    {
+        
+        let accounts = accountCoordinator.getAllAccounts()
+        
+        if accounts.isEmpty {
+            throw AccountError.accountNotFound
+        }
+        
+        print("\n Select the account to transfer amount:")
+        for (index, acc) in accounts.enumerated() {
+            
+            let last5 = String(acc.accountNumber.uuidString.suffix(5))
+            let type = (acc is CurrentAccount) ? "Current" : "Savings"
+            
+            guard let user = userService.getUserById(acc.userId) else {
+                continue
+            }
+            
+            print(
+                """
+                 \(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last5) (\(type))
+                     UserName: \(user.name) , PhoneNumber: \(user.phoneNumber)
+                
+                """
+            )
+        }
+        
+        guard
+            let account = InputUtils.readMenuChoice(
+                from: accounts,
+                prompt: "Enter a choice (press Enter to move back)"
+            )
+        else {
+            return nil
+        }
+        
+        return account
+        
+    }
+    
 }
 
 enum UserMenu: String, CaseIterable {
@@ -417,5 +413,5 @@ enum UserMenu: String, CaseIterable {
     case transactionHistory = "View Transaction History"
     case transactionHistoryByMonthAndYear = "Filter the transaction history based on month and year"
     case logout = "Logout"
-    
+
 }

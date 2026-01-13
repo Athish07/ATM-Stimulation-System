@@ -32,7 +32,6 @@ final class CurrentAccountManager: AccountService {
 
     func deposit(
         to accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
         
@@ -53,7 +52,6 @@ final class CurrentAccountManager: AccountService {
     
     func withdraw(
         from accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
 

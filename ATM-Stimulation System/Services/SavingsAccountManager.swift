@@ -7,9 +7,9 @@ final class SavingsAccountManager: AccountService {
     private let interestRate: Double = 0.85
     private let minimumBalance: Double = 10
     
-    private let perDayLimit: Double = 10_000
+    private let perDayLimit: Double = 1000
     private let perMonthLimit: Double = 10_000
-    private let perYearLimit: Double = 100
+    private let perYearLimit: Double = 1_00_000
     
     init(repository: AccountRepository, transactionRepository: TransactionRepository) {
         self.repository = repository
@@ -38,7 +38,6 @@ final class SavingsAccountManager: AccountService {
 
     func deposit(
         to accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
         
@@ -59,7 +58,6 @@ final class SavingsAccountManager: AccountService {
 
     func withdraw(
         from accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
 
@@ -142,11 +140,6 @@ extension SavingsAccountManager {
         if perYearSum + amount > perYearLimit {
             throw TransactionLimitError.perYearLimitExceed
         }
-//        
-//        print(perDaySum)
-//        print(perMonthSum)
-//        print(perYearSum)
-        
     }
     
     private func sumAmount(amountSum: inout Double, transactionHistory: [Transaction]) {

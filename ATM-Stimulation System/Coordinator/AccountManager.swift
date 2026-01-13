@@ -49,14 +49,13 @@ final class AccountManager: AccountCoordinator {
     
     func deposit(
         to accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
         
         let service = serviceForAccount(accountNumber)
         
         do {
-            try service.deposit(to: accountNumber, pin: pin, amount: amount)
+            try service.deposit(to: accountNumber, amount: amount)
             
             recordTransaction(
                 accountNumber: accountNumber,
@@ -77,14 +76,13 @@ final class AccountManager: AccountCoordinator {
     
     func withdraw(
         from accountNumber: UUID,
-        pin: String,
         amount: Double
     ) throws {
         
         let service = serviceForAccount(accountNumber)
         
         do {
-            try service.withdraw(from: accountNumber, pin: pin, amount: amount)
+            try service.withdraw(from: accountNumber, amount: amount)
             recordTransaction(
                 accountNumber: accountNumber,
                 amount: -amount,
@@ -104,17 +102,16 @@ final class AccountManager: AccountCoordinator {
     func transfer(
         from source: UUID,
         to destination: UUID,
-        pin: String,
         amount: Double
     ) throws {
         
-        try withdraw(from: source, pin: pin, amount: amount)
+        try withdraw(from: source, amount: amount)
         
         do {
-            try deposit(to: destination, pin: pin, amount: amount)
+            try deposit(to: destination, amount: amount)
             
         } catch {
-            try? deposit(to: source, pin: pin, amount: amount)
+            try? deposit(to: source, amount: amount)
             throw error
         }
         
@@ -134,10 +131,13 @@ final class AccountManager: AccountCoordinator {
         
     }
     
-    func getAccounts(for userId: UUID) -> [Account] {
+    func getUserAccounts(for userId: UUID) -> [Account] {
         accountRepository.findByUserId(userId)
     }
     
+    func getAllAccounts() -> [Account] {
+        accountRepository.getAllAccounts()
+    }
     func getTransactionHistory(for accountNumber: UUID) -> [Transaction] {
         transactionRepository.findByAccountNumber(accountNumber)
     }
