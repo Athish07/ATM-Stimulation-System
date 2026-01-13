@@ -56,7 +56,7 @@ extension Transaction {
         case transfer = "Transfer"
     }
     
-    enum TransactionStatus{
+    enum TransactionStatus: Equatable {
         case completed
         case failed(reason: String)
     }

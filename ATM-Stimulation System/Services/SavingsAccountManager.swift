@@ -5,11 +5,11 @@ final class SavingsAccountManager: AccountService {
     private let repository: AccountRepository
     private let transactionRepository: TransactionRepository
     private let interestRate: Double = 0.85
-    private let minimumBalance: Double = 1000
+    private let minimumBalance: Double = 10
     
-    private let perDayLimit: Double = 10
-    private let perMonthLimit: Double = 10
-    private let perYearLimit: Double = 10
+    private let perDayLimit: Double = 10_000
+    private let perMonthLimit: Double = 1_000
+    private let perYearLimit: Double = 10_000_000_000
     
     init(repository: AccountRepository, transactionRepository: TransactionRepository) {
         self.repository = repository
@@ -118,7 +118,8 @@ extension SavingsAccountManager {
         }
         
         let perMonthHistory = history.filter { history in
-            return calendar.component(.month, from: history.date) == monthAsInt
+            return calendar.component(.month, from: history.date) == monthAsInt &&
+            calendar.component(.year, from: history.date) == yearAsInt
         }
         
         let perYearHistory = history.filter { history in
@@ -133,15 +134,15 @@ extension SavingsAccountManager {
         sumAmount(amountSum: &perMonthSum, transactionHistory: perMonthHistory)
         sumAmount(amountSum: &perYearSum, transactionHistory: perYearHistory)
         
-        if perDaySum > perDayLimit {
+        if perDaySum + amount > perDayLimit {
             throw TransactionLimitError.perDayLimitExceed
         }
         
-        if perMonthSum > perMonthLimit {
+        if perMonthSum + amount > perMonthLimit {
             throw TransactionLimitError.perMonthLimitExceed
         }
         
-        if perYearSum > perYearLimit {
+        if perYearSum + amount > perYearLimit {
             throw TransactionLimitError.perYearLimitExceed
         }
         
@@ -149,7 +150,12 @@ extension SavingsAccountManager {
     
     private func sumAmount(amountSum: inout Double, transactionHistory: [Transaction]) {
         
-        for history in transactionHistory { amountSum += history.amount }
+        for history in transactionHistory {
+            
+            if history.type == .withdrawal && history.status == .completed {
+                amountSum += history.amount
+            }
+        }
     }
 }
 
