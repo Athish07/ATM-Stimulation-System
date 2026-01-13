@@ -7,7 +7,12 @@ final class AccountManager: AccountCoordinator {
     private let accountRepository: AccountRepository
     private let transactionRepository: TransactionRepository
     
-    init(accountRepository: AccountRepository, transactionRepository: TransactionRepository,currentAccountService: CurrentAccountManager, savingsAccountService: SavingsAccountManager) {
+    init(
+        accountRepository: AccountRepository,
+        transactionRepository: TransactionRepository,
+        currentAccountService: CurrentAccountManager,
+        savingsAccountService: SavingsAccountManager
+    ) {
         self.accountRepository = accountRepository
         self.transactionRepository = transactionRepository
         self.currentAccountService = currentAccountService
@@ -140,19 +145,20 @@ final class AccountManager: AccountCoordinator {
 }
 
 extension AccountManager {
-
-    private func serviceForAccount(_ accountNumber: UUID) -> AccountService {
+    
+    private func serviceForAccount(_ accountNumber: UUID) -> any AccountService {
+        
         guard let account = accountRepository.findByAccountNumber(accountNumber) else {
             fatalError("Account not found")
         }
-
+        
         if account is CurrentAccount {
             return currentAccountService
         } else {
             return savingsAccountService
         }
     }
-
+    
     private func recordTransaction(
         accountNumber: UUID,
         counterAccountNumber: UUID? = nil,
@@ -169,5 +175,4 @@ extension AccountManager {
         )
         transactionRepository.save(transaction)
     }
-
 }

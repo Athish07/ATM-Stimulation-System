@@ -2,7 +2,7 @@ import Foundation
 
 class CurrentAccount: Account {
 
-    private(set) var overDraftLimit: Double
+    let overDraftLimit: Double
 
     init(
         bankName: String,

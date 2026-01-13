@@ -17,17 +17,17 @@ final class UserController {
     }
     
     func start() {
-
+        
         while true {
             OutputUtils.showMenu(options: UserMenu.allCases, title: "UserMenu")
-
+            
             guard
                 let choice = InputUtils.readMenuChoice(from: UserMenu.allCases)
             else {
                 print("Invalid Choice.")
                 continue
             }
-
+            
             switch choice {
             case .createAccount: createAccount()
             case .deposit: deposit()
@@ -41,10 +41,9 @@ final class UserController {
                 print("Thanks for useing the application.")
                 return
             }
-
         }
     }
-
+    
     private func createAccount() {
 
         print("\n--- Create New Account ---")
@@ -319,7 +318,7 @@ extension UserController {
 
     private func selectAccount() throws -> Account? {
         let accounts = accountCoordinator.getAccounts(for: userId)
-
+        
         if accounts.isEmpty {
             throw AccountError.accountNotFound
         }

@@ -2,7 +2,7 @@ import Foundation
 
 class SavingsAccount: Account {
 
-    private(set) var interestRate: Double
+    let interestRate: Double
 
     init(
         bankName: String,
