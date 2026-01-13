@@ -23,15 +23,6 @@ protocol AccountService {
     
 }
 
-extension AccountService {
-    
-    func verifyPin(pinHash: String, pin: String) throws {
-        if !SecretHasher.verify(pin, against: pinHash) {
-            throw AccountError.incorrectPin
-        }
-    }
-}
-
 enum AccountError: LocalizedError {
     case accountNotFound
     case invalidAmount

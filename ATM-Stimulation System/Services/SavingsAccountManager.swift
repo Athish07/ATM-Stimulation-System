@@ -8,8 +8,8 @@ final class SavingsAccountManager: AccountService {
     private let minimumBalance: Double = 10
     
     private let perDayLimit: Double = 10_000
-    private let perMonthLimit: Double = 1_000
-    private let perYearLimit: Double = 10_000_000_000
+    private let perMonthLimit: Double = 10_000
+    private let perYearLimit: Double = 100
     
     init(repository: AccountRepository, transactionRepository: TransactionRepository) {
         self.repository = repository
@@ -52,8 +52,6 @@ final class SavingsAccountManager: AccountService {
         else {
             throw AccountError.accountNotFound
         }
-
-        try verifyPin(pinHash: account.pinHash, pin: pin)
         
         account.deposit(amount)
         repository.save(account)
@@ -75,10 +73,9 @@ final class SavingsAccountManager: AccountService {
         else {
             throw AccountError.accountNotFound
         }
-
-        try verifyPin(pinHash: account.pinHash, pin: pin)
+        
         try validateTransactionLimit(accountNumber: accountNumber, amount: amount)
-
+        
         guard account.withdraw(amount) else {
             throw AccountError.insufficientBalance
         }
@@ -145,6 +142,10 @@ extension SavingsAccountManager {
         if perYearSum + amount > perYearLimit {
             throw TransactionLimitError.perYearLimitExceed
         }
+//        
+//        print(perDaySum)
+//        print(perMonthSum)
+//        print(perYearSum)
         
     }
     
@@ -153,7 +154,7 @@ extension SavingsAccountManager {
         for history in transactionHistory {
             
             if history.type == .withdrawal && history.status == .completed {
-                amountSum += history.amount
+                amountSum += abs(history.amount)
             }
         }
     }

@@ -47,8 +47,6 @@ final class CurrentAccountManager: AccountService {
             throw AccountError.accountNotFound
         }
         
-        try verifyPin(pinHash: account.pinHash, pin: pin)
-        
         account.deposit(amount)
         repository.save(account)
     }
@@ -69,9 +67,7 @@ final class CurrentAccountManager: AccountService {
         else {
             throw AccountError.accountNotFound
         }
-
-        try verifyPin(pinHash: account.pinHash, pin: pin)
-
+        
         guard account.withdraw(amount) else {
             throw AccountError.overdraftLimitExceeded
         }

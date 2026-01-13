@@ -100,6 +100,8 @@ final class UserController {
             let amount = readPositiveAmount("Enter amount to deposit")
             let pin = InputUtils.readString("Enter PIN")
 
+            try verifyPin(pinHash: account.pinHash, pin: pin)
+
             try accountCoordinator.deposit(
                 to: account.accountNumber,
                 pin: pin,
@@ -124,6 +126,8 @@ final class UserController {
             
             let amount = readPositiveAmount("Enter amount to withdraw")
             let pin = InputUtils.readString("Enter PIN")
+            
+            try verifyPin(pinHash: account.pinHash, pin: pin)
             
             try accountCoordinator.withdraw(
                 from: account.accountNumber,
@@ -350,6 +354,12 @@ extension UserController {
 
             print("PINs do not match or invalid format. Try again.")
 
+        }
+    }
+    
+    private func verifyPin(pinHash: String, pin: String) throws {
+        if !SecretHasher.verify(pin, against: pinHash) {
+            throw AccountError.incorrectPin
         }
     }
 
