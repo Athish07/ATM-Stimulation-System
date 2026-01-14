@@ -125,6 +125,9 @@ final class UserController {
             }
             
             let amount = InputUtils.readPositiveAmount("Enter amount to withdraw")
+            
+            try accountCoordinator.validateWithdrawal(for: account.accountNumber, amount: amount)
+            
             InputUtils.readAndVerifyPin(pinHash: account.pinHash)
             
             try accountCoordinator.withdraw(

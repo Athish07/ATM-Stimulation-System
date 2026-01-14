@@ -10,6 +10,11 @@ protocol AccountCoordinator {
         pin: String
     ) throws -> Account
     
+    func validateWithdrawal(
+        for accountNumber: UUID,
+        amount: Double
+    ) throws
+    
     func deposit(
         to accountNumber: UUID,
         amount: Double

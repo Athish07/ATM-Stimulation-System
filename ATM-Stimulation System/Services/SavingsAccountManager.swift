@@ -82,6 +82,32 @@ final class SavingsAccountManager: AccountService {
         
     }
     
+    func validateWithdrawal(
+        for accountNumber: UUID,
+        amount: Double
+    ) throws {
+
+        if amount <= 0 {
+            throw AccountError.invalidAmount
+        }
+
+        guard
+            let account = repository.findByAccountNumber(accountNumber)
+                as? SavingsAccount
+        else {
+            throw AccountError.accountNotFound
+        }
+        
+        try validateTransactionLimit(
+            accountNumber: accountNumber,
+            amount: amount
+        )
+        
+        guard account.canWithdraw(amount) else {
+            throw AccountError.insufficientBalance
+        }
+    }
+
 }
 
 extension SavingsAccountManager {

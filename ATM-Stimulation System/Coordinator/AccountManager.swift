@@ -99,6 +99,18 @@ final class AccountManager: AccountCoordinator {
         }
     }
     
+    func validateWithdrawal(
+        for accountNumber: UUID,
+        amount: Double
+    ) throws {
+        
+        guard let service = serviceForAccount(accountNumber) as? SavingsAccountManager else {
+            return 
+        }
+        
+        try service.validateWithdrawal(for: accountNumber, amount: amount)
+    }
+    
     func transfer(
         from source: UUID,
         to destination: UUID,
