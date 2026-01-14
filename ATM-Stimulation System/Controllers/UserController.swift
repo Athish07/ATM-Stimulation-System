@@ -93,7 +93,7 @@ final class UserController {
     private func deposit() {
         do {
 
-            guard let account = try selectUserAccount() else {
+            guard let account = selectUserAccount() else {
                 return
             }
             
@@ -117,7 +117,7 @@ final class UserController {
     private func withdraw() {
         do {
             
-            guard let account = try selectUserAccount() else {
+            guard let account = selectUserAccount() else {
                 return
             }
             
@@ -142,11 +142,11 @@ final class UserController {
             
             print("\n---- Money Transfer ----------\n")
             
-            guard let source = try selectUserAccount() else {
+            guard let source =  selectUserAccount() else {
                 return
             }
             
-            guard let destination = try selectTransferAccount() else {
+            guard let destination = searchAccounts() else {
                 return
             }
             
@@ -163,7 +163,7 @@ final class UserController {
                 to: destination.accountNumber,
                 amount: amount
             )
-
+            
             print(
                 """
                 Transfer successful!
@@ -176,7 +176,7 @@ final class UserController {
         }
         
     }
-
+    
     private func viewAccounts() {
         let accounts = accountCoordinator.getUserAccounts(for: userId)
 
@@ -254,9 +254,7 @@ final class UserController {
 
     private func transactionHistory() {
         
-        do {
-
-            guard let account = try selectUserAccount() else {
+            guard let account = selectUserAccount() else {
                 return
             }
 
@@ -274,17 +272,12 @@ final class UserController {
             for (index, transaction) in history.enumerated() {
                 print("\(index + 1). \(transaction.description())")
             }
-
-        } catch {
-            print(error.localizedDescription)
-        }
+        
     }
     
     private func transactionHistoryByMonthAndYear() {
         
-        do {
-
-            guard let account = try selectUserAccount() else {
+            guard let account = selectUserAccount() else {
                 return
             }
             
@@ -307,36 +300,34 @@ final class UserController {
             let newHistory = history.filter { history in
                 let historyMonthName = dateFormatter.string(from: history.date)
                 return historyMonthName.lowercased() == month.lowercased()
-                    && Calendar.current.component(.year, from: history.date)
-                        == year
+                && Calendar.current.component(.year, from: history.date)
+                == year
             }
             
             if newHistory.isEmpty {
                 print("\n No transaction history for that month and year.")
                 return
             }
-        
+            
             print("\n=== Transaction History Filter By Month and Year ===\n")
-
+            
             for (index, transaction) in newHistory.enumerated() {
                 print("\(index + 1). \(transaction.description())")
             }
-        } catch {
-            print(error.localizedDescription)
-        }
     }
 }
 
 extension UserController {
     
-    private func selectUserAccount() throws -> Account? {
+    private func selectUserAccount() -> Account? {
         let accounts = accountCoordinator.getUserAccounts(for: userId)
         
         if accounts.isEmpty {
-            throw AccountError.accountNotFound
+            print("No account available")
+            return nil
         }
         
-        print("\nYour accounts:")
+        print("\nSource accounts:")
         for (index, acc) in accounts.enumerated() {
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
@@ -358,18 +349,34 @@ extension UserController {
         
     }
     
-    private func selectTransferAccount() throws
-    -> Account?
-    {
+    private func searchAccounts() -> Account? {
         
+        print("\nDestination accounts:")
+        let query = InputUtils.readString(
+            "Enter the Name of the user to transfer amount"
+        ).lowercased()
+
         let accounts = accountCoordinator.getAllAccounts()
         
         if accounts.isEmpty {
-            throw AccountError.accountNotFound
+            print("No accounts available")
+            return nil
         }
         
-        print("\n Select the account to transfer amount:")
-        for (index, acc) in accounts.enumerated() {
+        let filteredAccounts = accounts.filter { acc in
+                guard let user = userService.getUserById(acc.userId) else {
+                    return false
+                }
+                return user.name.lowercased().contains(query)
+            }
+        
+        if filteredAccounts.isEmpty {
+                print("No matching accounts found")
+                return nil
+            }
+        
+        
+        for (index, acc) in filteredAccounts.enumerated() {
             
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
@@ -389,15 +396,14 @@ extension UserController {
         
         guard
             let account = InputUtils.readMenuChoice(
-                from: accounts,
+                from: filteredAccounts,
                 prompt: "Enter a choice (press Enter to move back)"
             )
         else {
             return nil
         }
-        
+
         return account
-        
     }
     
 }
