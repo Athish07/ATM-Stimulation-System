@@ -452,9 +452,13 @@ extension UserController {
             return user.name.lowercased().contains(searchQuery)
         }
 
-        let accountsToDisplay =
-            filteredAccounts.isEmpty ? allAccounts : filteredAccounts
-
+        let accountsToDisplay = searchQuery.isEmpty ? allAccounts : filteredAccounts
+        
+        if accountsToDisplay.isEmpty {
+            print("No accounts available.")
+            return nil
+        }
+        
         for (index, acc) in accountsToDisplay.enumerated() {
 
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
