@@ -154,7 +154,11 @@ final class AccountManager: AccountCoordinator {
         transactionRepository.findByAccountNumber(accountNumber)
     }
     
-    func updatePin(_ newPin: String, _ account: Account) {
+    func updatePin(_ newPin: String, _ account: Account) throws {
+        
+        if account.pinHash == SecretHasher.hash(newPin) {
+            throw AccountError.noChangeDetected
+        }
         
         account.setPin(newPin)
         accountRepository.save(account)

@@ -36,7 +36,12 @@ final class UserManager: UserService {
         
     }
     
-    func updatePassword(newPassword: String, user: inout User) {
+    func updatePassword(newPassword: String, user: inout User) throws {
+        
+        if user.passwordHash == SecretHasher.hash(newPassword) {
+            throw UserManagerError.noChangeDetected
+        }
+            
         user.setPassword(newPassword)
         userRepository.save(user)
     }
@@ -52,7 +57,7 @@ extension UserManager {
         var errorDescription: String? {
             switch self {
             case .userNotFound: return "Unable to update the details"
-            case .noChangeDetected: return "No change in the profile details."
+            case .noChangeDetected: return "No change detected."
             }
         }
     }
