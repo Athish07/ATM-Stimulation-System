@@ -22,7 +22,7 @@ class AppController {
             
             OutputUtils.showMenu(options: MainMenu.allCases, title: "MainMenu")
             guard
-                let choice = InputUtils.readMenuChoice(from: MainMenu.allCases,prompt: "Enter a choice")
+                let choice = InputUtils.readMenuChoice(from: MainMenu.allCases,prompt: "Enter a choice", allowCancel: false)
             else {
                 print("Invalid choice, try again.")
                 continue
@@ -47,20 +47,28 @@ class AppController {
             title: "Login Options"
         )
         
-        guard let choice = InputUtils.readMenuChoice(from: LoginType.allCases)
+        guard let choice = InputUtils.readMenuChoice(from: LoginType.allCases,prompt: "Enter a choice (Press ENTER to go Menu)")
         else {
             return
         }
         
         let identifier: String
-        
         switch choice {
         case .email:
-            identifier = InputUtils.readString("Enter email")
+           guard let identifierInput = InputUtils.readString("Enter email (press ENTER to go Menu)") else {
+                return
+            }
+            identifier = identifierInput
         case .phoneNumber:
-            identifier = InputUtils.readString("Enter phone Number")
+            guard let identifierInput = InputUtils.readString("Enter phone Number (press ENTER to go Menu)") else {
+                return
+            }
+            identifier = identifierInput
         }
-        let password = InputUtils.readString("Enter password")
+        
+        guard let password = InputUtils.readString("Enter password (press Enter to go Menu)") else {
+            return
+        }
         
         do {
             
@@ -86,10 +94,21 @@ class AppController {
         
         print("=== Register New User ===")
         
-        let name = InputUtils.readString("Enter full name")
-        let email = InputUtils.readEmail("Enter email")
-        let password = InputUtils.readAndValidatePassword()
-        let phoneNumber = InputUtils.readPhoneNumber("Enter phone number")
+        guard let name = InputUtils.readString("Enter full name (Press Enter to go Menu)", allowCancel: true) else {
+            return
+        }
+        
+        guard let email = InputUtils.readEmail("Enter email (Press Enter to go Menu)", allowCancel: true) else {
+            return
+        }
+        
+        guard let password = InputUtils.readPassword("Enter password (Press Enter to go Menu)", allowCancel: true) else {
+            return
+        }
+        
+        guard let phoneNumber = InputUtils.readPhoneNumber("Enter phone number (Press ENTER to go Menu)", allowCancel: true) else {
+            return
+        }
         
         do {
             

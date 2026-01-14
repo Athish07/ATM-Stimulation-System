@@ -47,14 +47,9 @@ final class SavingsAccountManager: AccountService {
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? SavingsAccount
-        else {
-            throw AccountError.accountNotFound
-        }
-
+        
+        let account = repository.findByAccountNumber(accountNumber) as! SavingsAccount
+       
         account.deposit(amount)
         repository.save(account)
     }
@@ -67,19 +62,13 @@ final class SavingsAccountManager: AccountService {
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? SavingsAccount
-        else {
-            throw AccountError.accountNotFound
-        }
-
+        let account = repository.findByAccountNumber(accountNumber) as! SavingsAccount
+        
         try validateTransactionLimit(
             accountNumber: accountNumber,
             amount: amount
         )
-
+        
         guard account.withdraw(amount) else {
             throw AccountError.insufficientBalance
         }
@@ -96,14 +85,9 @@ final class SavingsAccountManager: AccountService {
         if amount <= 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? SavingsAccount
-        else {
-            throw AccountError.accountNotFound
-        }
-
+        
+        let account = repository.findByAccountNumber(accountNumber) as! SavingsAccount
+        
         try validateTransactionLimit(
             accountNumber: accountNumber,
             amount: amount

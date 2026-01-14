@@ -34,18 +34,13 @@ final class CurrentAccountManager: AccountService {
         to accountNumber: UUID,
         amount: Double
     ) throws {
-
+        
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? CurrentAccount
-        else {
-            throw AccountError.accountNotFound
-        }
-
+        
+        let account = repository.findByAccountNumber(accountNumber) as! CurrentAccount
+        
         account.deposit(amount)
         repository.save(account)
     }
@@ -58,18 +53,12 @@ final class CurrentAccountManager: AccountService {
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? CurrentAccount
-        else {
-            throw AccountError.accountNotFound
-        }
-
+        let account = repository.findByAccountNumber(accountNumber) as! CurrentAccount
+        
         guard account.withdraw(amount) else {
             throw AccountError.overdraftLimitExceeded
         }
-
+        
         repository.save(account)
     }
     
@@ -77,17 +66,12 @@ final class CurrentAccountManager: AccountService {
         for accountNumber: UUID,
         amount: Double
     ) throws {
-
-        if amount <= 0 {
+        
+        if amount < 0 {
             throw AccountError.invalidAmount
         }
-
-        guard
-            let account = repository.findByAccountNumber(accountNumber)
-                as? CurrentAccount
-        else {
-            throw AccountError.accountNotFound
-        }
+        
+        let account = repository.findByAccountNumber(accountNumber) as! CurrentAccount
         
         guard account.canWithdraw(amount) else {
             throw AccountError.overdraftLimitExceeded

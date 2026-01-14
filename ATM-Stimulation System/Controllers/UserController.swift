@@ -22,7 +22,7 @@ final class UserController {
             OutputUtils.showMenu(options: UserMenu.allCases, title: "UserMenu")
 
             guard
-                let choice = InputUtils.readMenuChoice(from: UserMenu.allCases)
+                let choice = InputUtils.readMenuChoice(from: UserMenu.allCases, allowCancel: false)
             else {
                 print("Invalid Choice.")
                 continue
@@ -53,8 +53,22 @@ final class UserController {
 
         print("\n--- Create New Account ---")
 
-        let bankName = InputUtils.readString("Enter bank name")
-        let bankLocation = InputUtils.readString("Enter branch/location")
+        guard
+            let bankName = InputUtils.readString(
+                "Enter bank name (Press ENTER to go Menu)",
+                allowCancel: true
+            )
+        else {
+            return
+        }
+        guard
+            let bankLocation = InputUtils.readString(
+                "Enter branch/location (Press ENTER to go Menu)",
+                allowCancel: true
+            )
+        else {
+            return
+        }
 
         OutputUtils.showMenu(
             options: AccountType.allCases,
@@ -70,7 +84,9 @@ final class UserController {
             return
         }
 
-        let pin = InputUtils.readAndValidatePin()
+        guard let pin = InputUtils.readPin("Enter PIN (Press ENTER to go Menu)") else {
+            return
+        }
 
         do {
 
@@ -101,11 +117,16 @@ final class UserController {
                 return
             }
 
-            let amount = InputUtils.readPositiveAmount(
-                "Enter amount to deposit"
-            )
-            InputUtils.readAndVerifyPin(pinHash: account.pinHash)
-
+            guard let amount = InputUtils.readPositiveAmount(
+                "Enter amount to deposit (Press ENTER to go Menu)"
+            ) else {
+                return
+            }
+            
+            if !InputUtils.readAndVerifyPin(pinHash: account.pinHash) {
+                return
+            }
+            
             try accountCoordinator.deposit(
                 to: account.accountNumber,
                 amount: amount
@@ -127,16 +148,20 @@ final class UserController {
                 return
             }
 
-            let amount = InputUtils.readPositiveAmount(
-                "Enter amount to withdraw"
-            )
+            guard let amount = InputUtils.readPositiveAmount(
+                "Enter amount to withdraw (Press ENTER to go Menu)"
+            ) else {
+                return
+            }
 
             try accountCoordinator.validateWithdrawal(
                 for: account.accountNumber,
                 amount: amount
             )
 
-            InputUtils.readAndVerifyPin(pinHash: account.pinHash)
+            if !InputUtils.readAndVerifyPin(pinHash: account.pinHash) {
+                return
+            }
 
             try accountCoordinator.withdraw(
                 from: account.accountNumber,
@@ -169,10 +194,17 @@ final class UserController {
                 return
             }
 
-            let amount = InputUtils.readPositiveAmount(
-                "Enter a amount to transfer"
-            )
-            InputUtils.readAndVerifyPin(pinHash: source.pinHash)
+            guard
+                let amount = InputUtils.readPositiveAmount(
+                    "Enter a amount to transfer (Press ENTER to go Menu)"
+                )
+            else {
+                return
+            }
+            
+            if !InputUtils.readAndVerifyPin(pinHash: source.pinHash) {
+                return
+            }
 
             try accountCoordinator.transfer(
                 from: source.accountNumber,
@@ -257,7 +289,7 @@ final class UserController {
 
     private func updateProfile() {
 
-        guard let user = userService.getUserById(userId) else {
+        guard let oldUser = userService.getUserById(userId) else {
             print("User not found")
             return
         }
@@ -265,24 +297,26 @@ final class UserController {
         print("press ENTER if you want to keep the same details:")
 
         let name = InputUtils.readString(
-            "Enter Name(current name: \(user.name))",
+            "Enter Name(current name: \(oldUser.name))",
             allowCancel: true
         )
+        
         let email = InputUtils.readEmail(
-            "Enter Email(current email: \(user.email))",
+            "Enter Email(current email: \(oldUser.email))",
             allowCancel: true
         )
+        
         let phoneNumber = InputUtils.readPhoneNumber(
-            "Enter Phone Number(current phone Number: \(user.phoneNumber))",
+            "Enter Phone Number(current phone Number: \(oldUser.phoneNumber))",
             allowCancel: true
         )
 
         let updatedUser = User(
-            id: user.id,
-            name: name,
-            email: email,
-            password: user.passwordHash,
-            phoneNumber: phoneNumber
+            id: oldUser.id,
+            name: name ?? oldUser.name,
+            email: email ?? oldUser.email,
+            password: oldUser.passwordHash,
+            phoneNumber: phoneNumber ?? oldUser.phoneNumber
         )
 
         do {
@@ -304,9 +338,11 @@ final class UserController {
 
         while true {
 
-            let currentPassword = InputUtils.readString(
-                "Enter the current password"
-            )
+            guard let currentPassword = InputUtils.readString(
+                "Enter the current password (Press ENTER to go Menu)"
+            ) else {
+                return
+            }
 
             if !SecretHasher.verify(currentPassword, against: user.passwordHash)
             {
@@ -318,10 +354,13 @@ final class UserController {
         
         while true {
 
-            let newPassword = InputUtils.readPassword(
-                "Enter new password"
-            )
-
+            guard
+                let newPassword = InputUtils.readPassword(
+                    "Enter new password (Press ENTER to go Menu)"
+                )
+            else {
+                return
+            }
             
             if SecretHasher.verify(newPassword, against: user.passwordHash) {
                 print("No change between the new and the old password.")
@@ -345,7 +384,10 @@ final class UserController {
         }
 
         while true {
-            let currentPin = InputUtils.readString("Enter the current PIN")
+            
+            guard let currentPin = InputUtils.readString("Enter the current PIN (Press ENTER to go Menu)") else {
+                return
+            }
 
             if !SecretHasher.verify(currentPin, against: account.pinHash) {
                 print("Invalid pin, try again")
@@ -356,7 +398,9 @@ final class UserController {
 
         while true {
             
-            let newPin = InputUtils.readPin("Enter new PIN (4-6 digits)")
+            guard let newPin = InputUtils.readPin("Enter new PIN (4-6 digits) (Press ENTER to go Menu)") else {
+                return
+            }
             
             if SecretHasher.verify(newPin, against: account.pinHash) {
                 print("No change between the new and the old PIN")
@@ -406,8 +450,13 @@ final class UserController {
             return
         }
 
-        let month = InputUtils.readString("Enter the month")
-        let year = InputUtils.readInt("Enter the year")
+        guard let month = InputUtils.readString("Enter the month (Press ENTER to go Menu)") else {
+            return
+        }
+        
+        guard let year = InputUtils.readInt("Enter the year (Press Enter to go Menu)") else {
+            return
+        }
 
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale.current
@@ -455,7 +504,7 @@ extension UserController {
         guard
             let account = InputUtils.readMenuChoice(
                 from: accounts,
-                prompt: "Enter a choice (press Enter to move back)"
+                prompt: "Enter a choice (press ENTER to go Menu)"
             )
         else {
             return nil
@@ -471,8 +520,9 @@ extension UserController {
         let searchQuery = InputUtils.readString(
             "Enter the Name of the user to transfer amount or press ENTER to show all the user's",
             allowCancel: true
-        ).lowercased()
-
+        )
+        
+        
         let allAccounts = accountCoordinator.getAllAccounts().filter {
             $0.accountNumber != sourceAccountNumber
         }
@@ -482,16 +532,24 @@ extension UserController {
             return nil
 
         }
+        
+        let accountsToDisplay: [Account]
 
-        let filteredAccounts = allAccounts.filter { acc in
-            guard let user = userService.getUserById(acc.userId) else {
-                return false
+            if let query = searchQuery?.lowercased() {
+
+                let filteredAccounts = allAccounts.filter { account in
+                    guard let user = userService.getUserById(account.userId) else {
+                        return false
+                    }
+                    return user.name.lowercased().contains(query)
+                }
+
+                accountsToDisplay = filteredAccounts
+
+            } else {
+                
+                accountsToDisplay = allAccounts
             }
-            return user.name.lowercased().contains(searchQuery)
-        }
-
-        let accountsToDisplay =
-            searchQuery.isEmpty ? allAccounts : filteredAccounts
 
         if accountsToDisplay.isEmpty {
             print("No accounts available.")
@@ -515,14 +573,13 @@ extension UserController {
                 """
             )
         }
-
+        
         guard
             let account = InputUtils.readMenuChoice(
                 from: accountsToDisplay,
-                prompt: "Enter a choice (press Enter to move back)"
+                prompt: "Enter a choice (press Enter to go Menu)"
             )
         else {
-
             return nil
         }
 

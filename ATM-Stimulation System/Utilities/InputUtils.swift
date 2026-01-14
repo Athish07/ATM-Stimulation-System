@@ -2,22 +2,28 @@ import Foundation
 
 struct InputUtils {
 
-    private static func read(_ prompt: String) -> String {
-        
+    private static func read(_ prompt: String) -> String? {
+
         print(prompt, terminator: ": ")
-        let input = readLine()
-        return input?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        
+        guard
+            let input = readLine()?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !input.isEmpty
+        else {
+            return nil
+        }
+
+        return input
     }
 
     static func readInt(_ prompt: String, allowCancel: Bool = false) -> Int? {
 
         while true {
 
-            let input = read(prompt)
-
-            if input.isEmpty, allowCancel {
-                return nil
+            guard let input = read(prompt) else {
+                if allowCancel { return nil }
+                print("Invalid Input, please Enter a valid number.")
+                continue
             }
 
             if let number = Int(input) {
@@ -28,26 +34,33 @@ struct InputUtils {
         }
     }
 
-    static func readString(_ prompt: String, allowCancel: Bool = false) -> String {
+    static func readString(_ prompt: String, allowCancel: Bool = true)
+        -> String?
+    {
 
         while true {
 
-            let input = read(prompt)
-
-            if input.isEmpty, !allowCancel {
-                print("Input cannot be Empty. Enter a valid String.")
+            guard let input = read(prompt) else {
+                if allowCancel { return nil }
+                print("Input cannot be empty.")
                 continue
             }
 
             return input
         }
     }
-    
-    static func readDouble(_ prompt: String) -> Double {
+
+    static func readDouble(_ prompt: String, allowCancel: Bool = true)
+        -> Double?
+    {
 
         while true {
 
-            let input = read(prompt)
+            guard let input = read(prompt) else {
+                if allowCancel { return nil }
+                print("Invalid Input, please Enter a valid number.")
+                continue
+            }
 
             if let number = Double(input) {
                 return number
@@ -58,12 +71,11 @@ struct InputUtils {
 
     }
 
-    static func readEmail(_ prompt: String, allowCancel: Bool = false) -> String
+    static func readEmail(_ prompt: String, allowCancel: Bool = true)
+        -> String?
     {
 
         while true {
-
-            let email = read(prompt)
 
             let emailFormat =
                 "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
@@ -72,55 +84,54 @@ struct InputUtils {
                 emailFormat
             )
 
-            if (email.isEmpty && allowCancel) {
-                return email
-            }
-
-            if !emailPredicate.evaluate(with: email) {
+            guard let email = read(prompt) else {
+                if allowCancel { return nil }
                 print("Enter a valid email.")
                 continue
             }
 
-            return email
+            if emailPredicate.evaluate(with: email) {
+                return email
+            }
+
+            print("Enter a valid email.")
         }
     }
 
-    static func readPhoneNumber(_ prompt: String, allowCancel: Bool = false)
-        -> String
+    static func readPhoneNumber(_ prompt: String, allowCancel: Bool = true)
+        -> String?
     {
 
         while true {
 
-            let phoneNumber = read(prompt)
-
             let PHONE_REGEX = "^\\d{10}$"
             let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
 
-            if (phoneNumber.isEmpty && allowCancel) {
-                return phoneNumber
-            }
-
-            if !phoneTest.evaluate(with: phoneNumber) {
-                print("Invalid Phone Number")
+            guard let phoneNumber = read(prompt) else {
+                if allowCancel { return nil }
+                print("Enter a valid phone Number.")
                 continue
             }
 
-            return phoneNumber
+            if phoneTest.evaluate(with: phoneNumber) {
+                return phoneNumber
+            }
 
+            print("Enter a valid phone Number.")
         }
     }
 
     static func readPassword(
         _ prompt: String,
-        allowCancel: Bool = false
-    ) -> String {
+        allowCancel: Bool = true
+    ) -> String? {
 
         while true {
 
-            let password = read(prompt)
-
-            if password.isEmpty && allowCancel {
-                return password
+            guard let password = read(prompt) else {
+                if allowCancel { return nil }
+                print("Enter a valid password")
+                continue
             }
 
             var errors: [String] = []
@@ -159,7 +170,8 @@ struct InputUtils {
 
     static func readMenuChoice<T>(
         from options: [T],
-        prompt: String = "Enter a choice"
+        prompt: String = "Enter a choice",
+        allowCancel: Bool = true
     ) -> T? {
 
         if options.isEmpty {
@@ -168,7 +180,7 @@ struct InputUtils {
 
         while true {
 
-            guard let index = readInt(prompt, allowCancel: true) else {
+            guard let index = readInt(prompt, allowCancel: allowCancel) else {
                 return nil
             }
 
@@ -181,74 +193,55 @@ struct InputUtils {
 
     }
 
-    static func readAndVerifyPin(pinHash: String) {
+    static func readAndVerifyPin(
+        pinHash: String,
+        allowCancel: Bool = true
+    ) -> Bool {
 
         while true {
 
-            let pin = readString("Enter the pin")
+            guard let pin = readPin("Enter the pin (Press Enter to go back)",allowCancel: allowCancel)
+            else {
+                return !allowCancel
+            }
 
-            if pin.isEmpty { return }
+            if SecretHasher.verify(pin, against: pinHash) {
+                return true
+            }
 
-            if !SecretHasher.verify(pin, against: pinHash) {
+            print("Invalid PIN, please try again.")
+        }
+    }
+
+    static func readPin(_ prompt: String, allowCancel: Bool = true) -> String? {
+
+        while true {
+
+            guard let pin = read(prompt) else {
+                if allowCancel { return nil }
                 print("Invalid input, please try again.")
                 continue
             }
-            return
-        }
-    }
-    
-    static func readPin(_ prompt: String) -> String {
-        
-        while true {
-            
-            let pin = read(prompt)
-            
+
             if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
                 print("Invalid input, please try again.")
                 continue
             }
+
             return pin
         }
     }
 
-    static func readAndValidatePin(_ prompt: String = "Enter PIN (4-6 digits)") -> String {
+    static func readPositiveAmount(_ prompt: String, allowCancel: Bool = true)
+        -> Double?
+    {
+
         while true {
 
-            let pin = readPin(prompt)
-            
-            let confirm = readString("Confirm PIN")
-
-            if pin == confirm {
-                return pin
-            }
-
-            print("PINs do not match or invalid format. Try again.")
-
-        }
-    }
-    
-    static func readAndValidatePassword(_ prompt: String = "Enter password") -> String {
-        
-        let password = readPassword(prompt)
-        
-        while true {
-            
-            let confirm = readString("Confirm password")
-            
-            if password != confirm {
-                print("Passwords dosen't match.")
+            guard let amount = readDouble(prompt, allowCancel: allowCancel) else {
+                if allowCancel { return nil }
                 continue
             }
-            break
-            
-        }
-        return password
-    }
-
-    static func readPositiveAmount(_ prompt: String) -> Double {
-
-        while true {
-            let amount = readDouble(prompt)
             if amount < 0 {
                 print("Amount cannot be a negative value, try again.")
                 continue
