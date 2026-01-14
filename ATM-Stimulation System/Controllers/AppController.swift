@@ -88,20 +88,7 @@ class AppController {
         
         let name = InputUtils.readString("Enter full name")
         let email = InputUtils.readEmail("Enter email")
-        let password = InputUtils.readPassword("Enter password")
-        
-        while true {
-            
-            let confirm = InputUtils.readString("Confirm password")
-            
-            if password != confirm {
-                print("Passwords dosen't match.")
-                continue
-            }
-            break
-            
-        }
-        
+        let password = InputUtils.readAndValidatePassword()
         let phoneNumber = InputUtils.readPhoneNumber("Enter phone number")
         
         do {

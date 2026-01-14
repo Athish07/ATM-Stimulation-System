@@ -8,8 +8,8 @@ class Account {
     let bankLocation: String
     let openedDate: Date
     let minimumBalance: Double
-    let pinHash: String
     
+    private(set) var pinHash: String
     private(set) var balance: Double = 0.0
     
     init(
@@ -39,6 +39,10 @@ class Account {
     func maskedNumber() -> String {
         let str = accountNumber.uuidString
         return String(str.suffix(12))
+    }
+    
+    func setPin(_ newPin: String) {
+        pinHash = SecretHasher.hash(newPin)
     }
 }
 

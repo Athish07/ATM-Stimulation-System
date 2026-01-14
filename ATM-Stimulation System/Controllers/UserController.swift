@@ -34,8 +34,11 @@ final class UserController {
             case .withdraw: withdraw()
             case .transfer: transfer()
             case .viewAccounts: viewAccounts()
+            case .viewMiniStatement: viewMiniStatement()
             case .viewProfile: viewProfile()
             case .updateProfile: updateProfile()
+            case .updatePassword: updatePassword()
+            case .updatePin: updatePin()
             case .transactionHistory: transactionHistory()
             case .transactionHistoryByMonthAndYear: transactionHistoryByMonthAndYear()
             case .logout:
@@ -146,7 +149,7 @@ final class UserController {
                 return
             }
             
-            guard let destination = searchAccounts() else {
+            guard let destination = searchAccounts(source.accountNumber) else {
                 return
             }
             
@@ -195,6 +198,35 @@ final class UserController {
         }
     }
     
+    private func viewMiniStatement() {
+        
+        guard let account = selectUserAccount() else {
+            return
+        }
+        
+        let transactionHistory = accountCoordinator.getTransactionHistory(
+            for: account.accountNumber
+        )
+        
+        if transactionHistory.isEmpty {
+            print("\nNo transactions yet.\n")
+            return
+        }
+        
+        var count = 1
+        
+        for (index,transaction) in transactionHistory.enumerated() {
+            
+            if count == 5 {
+                break
+            }
+            print("\(index + 1). \(transaction.description())")
+            count += 1
+        }
+        
+        
+        
+    }
     private func viewProfile() {
         
         guard let user = userService.getUserById(userId) else {
@@ -250,6 +282,52 @@ final class UserController {
             print(error.localizedDescription)
         }
         
+    }
+    
+    private func updatePassword() {
+        
+        guard var user = userService.getUserById(userId) else {
+            print("currently unable to update the password")
+            return
+        }
+        
+        while true {
+            
+            let currentPassword = InputUtils.readString("Enter the current password")
+            
+            if !SecretHasher.verify(currentPassword, against: user.passwordHash) {
+                print("Invalid password, try again.")
+                continue
+            }
+            break
+        }
+        
+        let newPassword = InputUtils.readAndValidatePassword("Enter new password")
+        userService.updatePassword(newPassword: newPassword, user: &user)
+        print("Password updated successfully.")
+        
+    }
+    
+    private func updatePin() {
+        
+        guard let account = selectUserAccount() else {
+            return
+        }
+        
+        while true {
+            let currentPin = InputUtils.readString("Enter the current PIN")
+            
+            if !SecretHasher.verify(currentPin, against: account.pinHash) {
+                print("Invalid pin, try again")
+                continue
+            }
+            break
+        }
+        
+        let newPin = InputUtils.readAndValidatePin("Enter new PIN (4-6 digits)")
+        
+        accountCoordinator.updatePin(newPin, account)
+        print("PIN updated successfully.")
     }
 
     private func transactionHistory() {
@@ -318,16 +396,16 @@ final class UserController {
 }
 
 extension UserController {
-    
+
     private func selectUserAccount() -> Account? {
         let accounts = accountCoordinator.getUserAccounts(for: userId)
-        
+
         if accounts.isEmpty {
             print("No account available")
             return nil
         }
-        
-        print("\nSource accounts:")
+
+        print("\nYour accounts:")
         for (index, acc) in accounts.enumerated() {
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
@@ -335,7 +413,7 @@ extension UserController {
                 "\(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last5) (\(type))"
             )
         }
-        
+
         guard
             let account = InputUtils.readMenuChoice(
                 from: accounts,
@@ -344,80 +422,85 @@ extension UserController {
         else {
             return nil
         }
-        
+
         return account
-        
+
     }
-    
-    private func searchAccounts() -> Account? {
-        
+
+    private func searchAccounts(_ sourceAccountNumber: UUID) -> Account? {
+
         print("\nDestination accounts:")
-        let query = InputUtils.readString(
-            "Enter the Name of the user to transfer amount"
+        let searchQuery = InputUtils.readString(
+            "Enter the Name of the user to transfer amount or press ENTER to show all the user's",
+            allowCancel: true
         ).lowercased()
 
-        let accounts = accountCoordinator.getAllAccounts()
-        
-        if accounts.isEmpty {
+        let allAccounts = accountCoordinator.getAllAccounts().filter {
+            $0.accountNumber != sourceAccountNumber
+        }
+
+        if allAccounts.isEmpty {
             print("No accounts available")
             return nil
-        }
-        
-        let filteredAccounts = accounts.filter { acc in
-                guard let user = userService.getUserById(acc.userId) else {
-                    return false
-                }
-                return user.name.lowercased().contains(query)
-            }
-        
-        if filteredAccounts.isEmpty {
-                print("No matching accounts found")
-                return nil
-            }
-        
-        
-        for (index, acc) in filteredAccounts.enumerated() {
             
+        }
+
+        let filteredAccounts = allAccounts.filter { acc in
+            guard let user = userService.getUserById(acc.userId) else {
+                return false
+            }
+            return user.name.lowercased().contains(searchQuery)
+        }
+
+        let accountsToDisplay =
+            filteredAccounts.isEmpty ? allAccounts : filteredAccounts
+
+        for (index, acc) in accountsToDisplay.enumerated() {
+
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
             let type = (acc is CurrentAccount) ? "Current" : "Savings"
-            
+
             guard let user = userService.getUserById(acc.userId) else {
                 continue
             }
-            
+
             print(
                 """
                  \(index + 1). \(acc.bankName), AccountNo: XXX-XXX-\(last5) (\(type))
                      UserName: \(user.name) , PhoneNumber: \(user.phoneNumber)
-                
+
                 """
             )
         }
-        
+
         guard
             let account = InputUtils.readMenuChoice(
-                from: filteredAccounts,
+                from: accountsToDisplay,
                 prompt: "Enter a choice (press Enter to move back)"
             )
         else {
+            
             return nil
         }
 
         return account
     }
-    
+
 }
 
 enum UserMenu: String, CaseIterable {
     case viewProfile = "View Profile"
     case updateProfile = "Update Profile"
+    case updatePassword = "Update Password"
+    case updatePin = "Update Pin"
     case createAccount = "Create New Bank Account"
     case viewAccounts = "View My Accounts"
+    case viewMiniStatement = "View Mini Statement"
     case deposit = "Deposit Money"
     case withdraw = "Withdraw Money"
     case transfer = "Transfer Money"
     case transactionHistory = "View Transaction History"
-    case transactionHistoryByMonthAndYear = "Filter the transaction history based on month and year"
+    case transactionHistoryByMonthAndYear =
+        "Filter the transaction history based on month and year"
     case logout = "Logout"
-
 }

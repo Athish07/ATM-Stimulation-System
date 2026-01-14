@@ -142,6 +142,13 @@ final class AccountManager: AccountCoordinator {
         transactionRepository.findByAccountNumber(accountNumber)
     }
     
+    func updatePin(_ newPin: String, _ account: Account) {
+        
+        account.setPin(newPin)
+        accountRepository.save(account)
+    }
+    
+    
 }
 
 extension AccountManager {

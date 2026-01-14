@@ -197,10 +197,10 @@ struct InputUtils {
         }
     }
 
-    static func readAndValidatePin() -> String {
+    static func readAndValidatePin(_ prompt: String = "Enter PIN (4-6 digits)") -> String {
         while true {
 
-            let pin = InputUtils.readString("Enter PIN (4-6 digits)")
+            let pin = InputUtils.readString(prompt)
 
             if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
                 print("Invalid input, please try again.")
@@ -216,6 +216,24 @@ struct InputUtils {
             print("PINs do not match or invalid format. Try again.")
 
         }
+    }
+    
+    static func readAndValidatePassword(_ prompt: String = "Enter password") -> String {
+        
+        let password = InputUtils.readPassword(prompt)
+        
+        while true {
+            
+            let confirm = InputUtils.readString("Confirm password")
+            
+            if password != confirm {
+                print("Passwords dosen't match.")
+                continue
+            }
+            break
+            
+        }
+        return password
     }
 
     static func readPositiveAmount(_ prompt: String) -> Double {

@@ -5,7 +5,7 @@ struct User: Equatable {
     let id: UUID
     let name: String
     let email: String
-    let passwordHash: String
+    private(set) var passwordHash: String
     let phoneNumber: String
 
     init(
@@ -36,4 +36,8 @@ struct User: Equatable {
             self.phoneNumber = phoneNumber
         }
     
+    
+    mutating func setPassword(_ newPassword: String) {
+        passwordHash = SecretHasher.hash(newPassword)
+    }
 }

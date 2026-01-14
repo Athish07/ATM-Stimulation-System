@@ -28,6 +28,7 @@ protocol AccountCoordinator {
     
     func getUserAccounts(for userId: UUID) -> [Account]
     func getAllAccounts() -> [Account]
+    func updatePin(_ newPin: String, _ account: Account)
     
     func getTransactionHistory(for accountNumber: UUID) -> [Transaction]
 }
