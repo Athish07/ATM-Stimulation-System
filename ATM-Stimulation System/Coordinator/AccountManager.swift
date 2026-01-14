@@ -103,14 +103,8 @@ final class AccountManager: AccountCoordinator {
         for accountNumber: UUID,
         amount: Double
     ) throws {
-
-        guard
-            let service = serviceForAccount(accountNumber)
-                as? SavingsAccountManager
-        else {
-            return
-        }
-
+        
+        let service = serviceForAccount(accountNumber)
         try service.validateWithdrawal(for: accountNumber, amount: amount)
     }
 

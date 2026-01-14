@@ -72,4 +72,26 @@ final class CurrentAccountManager: AccountService {
 
         repository.save(account)
     }
+    
+    func validateWithdrawal(
+        for accountNumber: UUID,
+        amount: Double
+    ) throws {
+
+        if amount <= 0 {
+            throw AccountError.invalidAmount
+        }
+
+        guard
+            let account = repository.findByAccountNumber(accountNumber)
+                as? CurrentAccount
+        else {
+            throw AccountError.accountNotFound
+        }
+        
+        guard account.canWithdraw(amount) else {
+            throw AccountError.overdraftLimitExceeded
+        }
+    }
+
 }

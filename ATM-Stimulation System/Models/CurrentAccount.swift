@@ -29,7 +29,23 @@ class CurrentAccount: Account {
 
         let newBalance = balance - amount
 
-        if newBalance >= minimumBalance {
+        if newBalance >= 0 {
+            decreaseBalance(amount)
+            return true
+        }
+        
+        if newBalance >= -overDraftLimit {
+            decreaseBalance(amount)
+            return true
+        }
+        return false
+    }
+    
+    func canWithdraw(_ amount: Double) -> Bool {
+        
+        let newBalance = balance - amount
+
+        if newBalance >= 0 {
             decreaseBalance(amount)
             return true
         }

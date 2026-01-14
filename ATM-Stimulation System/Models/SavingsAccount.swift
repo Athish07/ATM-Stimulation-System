@@ -23,7 +23,7 @@ class SavingsAccount: Account {
     }
     
     func canWithdraw(_ amount: Double) -> Bool {
-        return balance - amount >= minimumBalance
+        return balance - amount >= 0
     }
     
     func withdraw(_ amount: Double) -> Bool {
@@ -33,7 +33,7 @@ class SavingsAccount: Account {
         
         let newBalance = balance - amount
         
-        if newBalance >= minimumBalance {
+        if newBalance >= 0 {
             decreaseBalance(amount)
             return true
         }

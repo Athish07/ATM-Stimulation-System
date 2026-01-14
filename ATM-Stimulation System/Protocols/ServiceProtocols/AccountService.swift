@@ -19,4 +19,8 @@ protocol AccountService {
         amount: Double
     ) throws
     
+    func validateWithdrawal(
+        for accountNumber: UUID,
+        amount: Double
+    ) throws
 }
