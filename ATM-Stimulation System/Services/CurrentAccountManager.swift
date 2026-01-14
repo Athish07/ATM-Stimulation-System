@@ -5,11 +5,11 @@ final class CurrentAccountManager: AccountService {
     private let repository: AccountRepository
     private let minimumBalance: Double = 5000
     private let overDraftLimit: Double = 5000
-    
+
     init(repository: AccountRepository) {
         self.repository = repository
     }
-    
+
     func createAccount(
         bankName: String,
         userId: UUID,
@@ -34,22 +34,22 @@ final class CurrentAccountManager: AccountService {
         to accountNumber: UUID,
         amount: Double
     ) throws {
-        
+
         if amount < 0 {
             throw AccountError.invalidAmount
         }
-        
+
         guard
             let account = repository.findByAccountNumber(accountNumber)
                 as? CurrentAccount
         else {
             throw AccountError.accountNotFound
         }
-        
+
         account.deposit(amount)
         repository.save(account)
     }
-    
+
     func withdraw(
         from accountNumber: UUID,
         amount: Double
@@ -65,7 +65,7 @@ final class CurrentAccountManager: AccountService {
         else {
             throw AccountError.accountNotFound
         }
-        
+
         guard account.withdraw(amount) else {
             throw AccountError.overdraftLimitExceeded
         }
@@ -73,4 +73,3 @@ final class CurrentAccountManager: AccountService {
         repository.save(account)
     }
 }
-

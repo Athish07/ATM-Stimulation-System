@@ -1,7 +1,7 @@
 import Foundation
 
 final class UserController {
-    
+
     private let userId: UUID
     private let userService: UserService
     private let accountCoordinator: AccountCoordinator
@@ -15,19 +15,19 @@ final class UserController {
         self.userService = userService
         self.accountCoordinator = accountCoordinator
     }
-    
+
     func start() {
-        
+
         while true {
             OutputUtils.showMenu(options: UserMenu.allCases, title: "UserMenu")
-            
+
             guard
                 let choice = InputUtils.readMenuChoice(from: UserMenu.allCases)
             else {
                 print("Invalid Choice.")
                 continue
             }
-            
+
             switch choice {
             case .createAccount: createAccount()
             case .deposit: deposit()
@@ -40,26 +40,27 @@ final class UserController {
             case .updatePassword: updatePassword()
             case .updatePin: updatePin()
             case .transactionHistory: transactionHistory()
-            case .transactionHistoryByMonthAndYear: transactionHistoryByMonthAndYear()
+            case .transactionHistoryByMonthAndYear:
+                transactionHistoryByMonthAndYear()
             case .logout:
                 print("Thanks for useing the application.")
                 return
             }
         }
     }
-    
+
     private func createAccount() {
 
         print("\n--- Create New Account ---")
 
         let bankName = InputUtils.readString("Enter bank name")
         let bankLocation = InputUtils.readString("Enter branch/location")
-        
+
         OutputUtils.showMenu(
             options: AccountType.allCases,
             title: "Select Account Type"
         )
-        
+
         guard
             let accountType = InputUtils.readMenuChoice(
                 from: AccountType.allCases
@@ -70,9 +71,9 @@ final class UserController {
         }
 
         let pin = InputUtils.readAndValidatePin()
-        
+
         do {
-            
+
             let account = try accountCoordinator.createAccount(
                 bankName: bankName,
                 userId: userId,
@@ -80,29 +81,31 @@ final class UserController {
                 bankLocation: bankLocation,
                 pin: pin
             )
-            
+
             print("\nAccount Created Successfully.")
             OutputUtils.displayAccountDetails(
                 account: account,
                 accountType: accountType.rawValue
             )
-            
+
         } catch {
             print(error.localizedDescription)
         }
-        
+
     }
-    
+
     private func deposit() {
         do {
 
             guard let account = selectUserAccount() else {
                 return
             }
-            
-            let amount = InputUtils.readPositiveAmount("Enter amount to deposit")
+
+            let amount = InputUtils.readPositiveAmount(
+                "Enter amount to deposit"
+            )
             InputUtils.readAndVerifyPin(pinHash: account.pinHash)
-            
+
             try accountCoordinator.deposit(
                 to: account.accountNumber,
                 amount: amount
@@ -116,25 +119,30 @@ final class UserController {
             print("Deposit failed:", error.localizedDescription)
         }
     }
-    
+
     private func withdraw() {
         do {
-            
+
             guard let account = selectUserAccount() else {
                 return
             }
-            
-            let amount = InputUtils.readPositiveAmount("Enter amount to withdraw")
-            
-            try accountCoordinator.validateWithdrawal(for: account.accountNumber, amount: amount)
-            
+
+            let amount = InputUtils.readPositiveAmount(
+                "Enter amount to withdraw"
+            )
+
+            try accountCoordinator.validateWithdrawal(
+                for: account.accountNumber,
+                amount: amount
+            )
+
             InputUtils.readAndVerifyPin(pinHash: account.pinHash)
-            
+
             try accountCoordinator.withdraw(
                 from: account.accountNumber,
                 amount: amount
             )
-            
+
             print(
                 "\nWithdrawal successful! New balance:\(account.balance)"
             )
@@ -142,34 +150,36 @@ final class UserController {
             print("Withdrawal failed:", error.localizedDescription)
         }
     }
-    
+
     private func transfer() {
         do {
-            
+
             print("\n---- Money Transfer ----------\n")
-            
-            guard let source =  selectUserAccount() else {
+
+            guard let source = selectUserAccount() else {
                 return
             }
-            
+
             guard let destination = searchAccounts(source.accountNumber) else {
                 return
             }
-            
+
             if source.accountNumber == destination.accountNumber {
                 print("Cannot transfer to the same account.")
                 return
             }
 
-            let amount = InputUtils.readPositiveAmount("Enter a amount to transfer")
+            let amount = InputUtils.readPositiveAmount(
+                "Enter a amount to transfer"
+            )
             InputUtils.readAndVerifyPin(pinHash: source.pinHash)
-            
+
             try accountCoordinator.transfer(
                 from: source.accountNumber,
                 to: destination.accountNumber,
                 amount: amount
             )
-            
+
             print(
                 """
                 Transfer successful!
@@ -180,9 +190,9 @@ final class UserController {
         } catch {
             print("Transfer failed:", error.localizedDescription)
         }
-        
+
     }
-    
+
     private func viewAccounts() {
         let accounts = accountCoordinator.getUserAccounts(for: userId)
 
@@ -200,38 +210,36 @@ final class UserController {
             )
         }
     }
-    
+
     private func viewMiniStatement() {
-        
+
         guard let account = selectUserAccount() else {
             return
         }
-        
+
         let transactionHistory = accountCoordinator.getTransactionHistory(
             for: account.accountNumber
         )
-        
+
         if transactionHistory.isEmpty {
             print("\nNo transactions yet.\n")
             return
         }
-        
+
         var count = 1
-        
-        for (index,transaction) in transactionHistory.enumerated() {
-            
+
+        for (index, transaction) in transactionHistory.enumerated() {
+
             if count == 5 {
                 break
             }
             print("\(index + 1). \(transaction.description())")
             count += 1
         }
-        
-        
-        
+
     }
     private func viewProfile() {
-        
+
         guard let user = userService.getUserById(userId) else {
             print("Unable to load the details...")
             return
@@ -244,7 +252,7 @@ final class UserController {
             PhnoneNumber: \(user.phoneNumber)
             """
         )
-        
+
     }
 
     private func updateProfile() {
@@ -276,7 +284,7 @@ final class UserController {
             password: user.passwordHash,
             phoneNumber: phoneNumber
         )
-        
+
         do {
 
             try userService.updateProfile(updatedUser)
@@ -284,117 +292,144 @@ final class UserController {
         } catch {
             print(error.localizedDescription)
         }
-        
+
     }
-    
+
     private func updatePassword() {
-        
+
         guard var user = userService.getUserById(userId) else {
             print("currently unable to update the password")
             return
         }
-        
+
         while true {
-            
-            let currentPassword = InputUtils.readString("Enter the current password")
-            
-            if !SecretHasher.verify(currentPassword, against: user.passwordHash) {
+
+            let currentPassword = InputUtils.readString(
+                "Enter the current password"
+            )
+
+            if !SecretHasher.verify(currentPassword, against: user.passwordHash)
+            {
                 print("Invalid password, try again.")
                 continue
             }
             break
         }
         
-        let newPassword = InputUtils.readAndValidatePassword("Enter new password")
-        userService.updatePassword(newPassword: newPassword, user: &user)
-        print("Password updated successfully.")
-        
+        while true {
+
+            let newPassword = InputUtils.readPassword(
+                "Enter new password"
+            )
+
+            
+            if SecretHasher.verify(newPassword, against: user.passwordHash) {
+                print("No change between the new and the old password.")
+                continue
+            }
+            
+            userService.updatePassword(
+                newPassword: newPassword,
+                user: &user
+            )
+            print("Password updated successfully.")
+            break
+        }
+
     }
-    
+
     private func updatePin() {
-        
+
         guard let account = selectUserAccount() else {
             return
         }
-        
+
         while true {
             let currentPin = InputUtils.readString("Enter the current PIN")
-            
+
             if !SecretHasher.verify(currentPin, against: account.pinHash) {
                 print("Invalid pin, try again")
                 continue
             }
             break
         }
-        
-        let newPin = InputUtils.readAndValidatePin("Enter new PIN (4-6 digits)")
-        
-        accountCoordinator.updatePin(newPin, account)
-        print("PIN updated successfully.")
+
+        while true {
+            
+            let newPin = InputUtils.readPin("Enter new PIN (4-6 digits)")
+            
+            if SecretHasher.verify(newPin, against: account.pinHash) {
+                print("No change between the new and the old PIN")
+                continue
+            }
+            accountCoordinator.updatePin(newPin, account)
+            print("PIN updated successfully.")
+            break
+        }
     }
 
     private func transactionHistory() {
-        
-            guard let account = selectUserAccount() else {
-                return
-            }
 
-            let history = accountCoordinator.getTransactionHistory(
-                for: account.accountNumber
-            )
+        guard let account = selectUserAccount() else {
+            return
+        }
 
-            if history.isEmpty {
-                print("\nNo transactions yet.\n")
-                return
-            }
-        
-            print("\n=== Transaction History ===\n")
+        let history = accountCoordinator.getTransactionHistory(
+            for: account.accountNumber
+        )
 
-            for (index, transaction) in history.enumerated() {
-                print("\(index + 1). \(transaction.description())")
-            }
-        
+        if history.isEmpty {
+            print("\nNo transactions yet.\n")
+            return
+        }
+
+        print("\n=== Transaction History ===\n")
+
+        for (index, transaction) in history.enumerated() {
+            print("\(index + 1). \(transaction.description())")
+        }
+
     }
-    
-    private func transactionHistoryByMonthAndYear() {
-        
-            guard let account = selectUserAccount() else {
-                return
-            }
-            
-            let history = accountCoordinator.getTransactionHistory(
-                for: account.accountNumber
-            )
 
-            if history.isEmpty {
-                print("\nNo transactions yet.\n")
-                return
-            }
-            
-            let month = InputUtils.readString("Enter the month")
-            let year = InputUtils.readInt("Enter the year")
-            
-            let dateFormatter = DateFormatter()
-             dateFormatter.locale = Locale.current
-             dateFormatter.dateFormat = "MMMM"
-            
-            let newHistory = history.filter { history in
-                let historyMonthName = dateFormatter.string(from: history.date)
-                return historyMonthName.lowercased() == month.lowercased()
+    private func transactionHistoryByMonthAndYear() {
+
+        guard let account = selectUserAccount() else {
+            return
+        }
+
+        let history = accountCoordinator.getTransactionHistory(
+            for: account.accountNumber
+        )
+
+        if history.isEmpty {
+            print("\nNo transactions yet.\n")
+            return
+        }
+
+        let month = InputUtils.readString("Enter the month")
+        let year = InputUtils.readInt("Enter the year")
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale.current
+        dateFormatter.dateFormat = "MMMM"
+
+        let newHistory = history.filter { history in
+            let historyMonthName = dateFormatter.string(from: history.date)
+            return historyMonthName.lowercased() == month.lowercased()
                 && Calendar.current.component(.year, from: history.date)
-                == year
-            }
-            
-            if newHistory.isEmpty {
-                print("\n No transaction history for that month and year.")
-                return
-            }
-            
-            print("\n=== Transaction History Filter By Month and Year ===\n")
-            
-            for (index, transaction) in newHistory.enumerated() {
-                print("\(index + 1). \(transaction.description())")
-            }
+                    == year
+        }
+
+        if newHistory.isEmpty {
+            print("\n No transaction history for that month and year.")
+            return
+        }
+
+        print("\n=== Transaction History Filter By Month and Year ===\n")
+
+        for (index, transaction) in newHistory.enumerated() {
+            print("\(index + 1). \(transaction.description())")
+        }
     }
 }
 
@@ -445,7 +480,7 @@ extension UserController {
         if allAccounts.isEmpty {
             print("No accounts available")
             return nil
-            
+
         }
 
         let filteredAccounts = allAccounts.filter { acc in
@@ -455,13 +490,14 @@ extension UserController {
             return user.name.lowercased().contains(searchQuery)
         }
 
-        let accountsToDisplay = searchQuery.isEmpty ? allAccounts : filteredAccounts
-        
+        let accountsToDisplay =
+            searchQuery.isEmpty ? allAccounts : filteredAccounts
+
         if accountsToDisplay.isEmpty {
             print("No accounts available.")
             return nil
         }
-        
+
         for (index, acc) in accountsToDisplay.enumerated() {
 
             let last5 = String(acc.accountNumber.uuidString.suffix(5))
@@ -486,7 +522,7 @@ extension UserController {
                 prompt: "Enter a choice (press Enter to move back)"
             )
         else {
-            
+
             return nil
         }
 

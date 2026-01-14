@@ -185,7 +185,7 @@ struct InputUtils {
 
         while true {
 
-            let pin = InputUtils.readString("Enter the pin")
+            let pin = readString("Enter the pin")
 
             if pin.isEmpty { return }
 
@@ -196,18 +196,27 @@ struct InputUtils {
             return
         }
     }
-
-    static func readAndValidatePin(_ prompt: String = "Enter PIN (4-6 digits)") -> String {
+    
+    static func readPin(_ prompt: String) -> String {
+        
         while true {
-
-            let pin = InputUtils.readString(prompt)
-
+            
+            let pin = read(prompt)
+            
             if pin.count < 4 || pin.count > 6 || !pin.allSatisfy(\.isNumber) {
                 print("Invalid input, please try again.")
                 continue
             }
+            return pin
+        }
+    }
 
-            let confirm = InputUtils.readString("Confirm PIN")
+    static func readAndValidatePin(_ prompt: String = "Enter PIN (4-6 digits)") -> String {
+        while true {
+
+            let pin = readPin(prompt)
+            
+            let confirm = readString("Confirm PIN")
 
             if pin == confirm {
                 return pin
@@ -220,11 +229,11 @@ struct InputUtils {
     
     static func readAndValidatePassword(_ prompt: String = "Enter password") -> String {
         
-        let password = InputUtils.readPassword(prompt)
+        let password = readPassword(prompt)
         
         while true {
             
-            let confirm = InputUtils.readString("Confirm password")
+            let confirm = readString("Confirm password")
             
             if password != confirm {
                 print("Passwords dosen't match.")
@@ -239,7 +248,7 @@ struct InputUtils {
     static func readPositiveAmount(_ prompt: String) -> Double {
 
         while true {
-            let amount = InputUtils.readDouble(prompt)
+            let amount = readDouble(prompt)
             if amount < 0 {
                 print("Amount cannot be a negative value, try again.")
                 continue

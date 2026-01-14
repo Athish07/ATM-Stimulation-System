@@ -36,12 +36,7 @@ final class UserManager: UserService {
         
     }
     
-    func updatePassword(newPassword: String, user: inout User) throws {
-        
-        if user.passwordHash == SecretHasher.hash(newPassword) {
-            throw UserManagerError.noChangeDetected
-        }
-            
+    func updatePassword(newPassword: String, user: inout User)  {
         user.setPassword(newPassword)
         userRepository.save(user)
     }
